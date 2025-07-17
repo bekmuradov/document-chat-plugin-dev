@@ -1,5 +1,9 @@
 name: 🔖 Semantic Release
 
+permissions:
+  contents: write       # allows pushing tags & releases
+  issues: write         # allows @semantic-release/github to open a failure issue
+
 on:
   push:
     branches:
@@ -8,9 +12,13 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -26,6 +34,4 @@ jobs:
           npm run pack:tar
 
       - name: Semantic Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
