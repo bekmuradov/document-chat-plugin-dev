@@ -1,13 +1,13 @@
 name: 🔖 Semantic Release
 
 permissions:
-  contents: write       # allows pushing tags & releases
-  issues: write         # allows @semantic-release/github to open a failure issue
+  contents: write
+  issues: write
 
 on:
   push:
     branches:
-      - main   # or your release branch
+      - main
 
 jobs:
   release:
