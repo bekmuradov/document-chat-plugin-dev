@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-PluginTemplate Plugin Lifecycle Manager (New Architecture)
+ChatWithYourDocuments Plugin Lifecycle Manager (New Architecture)
 
-This script handles install/update/delete operations for the PluginTemplate plugin
+This script handles install/update/delete operations for the ChatWithYourDocuments plugin
 using the new multi-user plugin lifecycle management architecture.
 """
 
@@ -89,35 +89,35 @@ except ImportError:
             
     except ImportError as e:
         logger.error(f"Failed to import BaseLifecycleManager: {e}")
-        raise ImportError("PluginTemplate plugin requires the new architecture BaseLifecycleManager")
+        raise ImportError("ChatWithYourDocuments plugin requires the new architecture BaseLifecycleManager")
 
 
-class PluginTemplateLifecycleManager(BaseLifecycleManager):
-    """Lifecycle manager for PluginTemplate plugin using new architecture"""
+class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
+    """Lifecycle manager for ChatWithYourDocuments plugin using new architecture"""
     
     def __init__(self, plugins_base_dir: str = None):
         """Initialize the lifecycle manager"""
         # TEMPLATE: Define plugin-specific data - TODO: Customize for your plugin
         self.plugin_data = {
-            "name": "PluginTemplate",
-            "description": "A template for creating BrainDrive plugins",
-            "version": "1.0.0",
+            "name": "ChatWithYourDocuments",
+            "description": "Chat With Your Documents BrainDrive plugin",
+            "version": "1.0.1",
             "type": "frontend",
             "icon": "Puzzle",  # TODO: Choose an appropriate icon
-            "category": "template",  # TODO: Choose appropriate category
+            "category": "ai",  # TODO: Choose appropriate category
             "official": False,  # TODO: Set to True if this is an official plugin
             "author": "BrainDrive",  # TODO: Update with your name/organization
             "compatibility": "1.0.0",
-            "scope": "PluginTemplate",  # TODO: Update scope name
+            "scope": "ChatWithYourDocuments",  # TODO: Update scope name
             "bundle_method": "webpack",
             "bundle_location": "dist/remoteEntry.js",
             "is_local": False,
             "long_description": "A comprehensive template for creating BrainDrive plugins with React, TypeScript, and Module Federation. Includes examples of service integration, theme support, and component patterns.",
-            "plugin_slug": "PluginTemplate",  # TODO: Update plugin slug
+            "plugin_slug": "ChatWithYourDocuments",  # TODO: Update plugin slug
             # Update tracking fields (matching plugin model)
             "source_type": "github",  # TODO: Update if using different source
-            "source_url": "https://github.com/YourUsername/PluginTemplate",  # TODO: Update URL
-            "update_check_url": "https://api.github.com/repos/YourUsername/PluginTemplate/releases/latest",  # TODO: Update URL
+            "source_url": "https://github.com/bekmuradov/BrainDrive-Plugins",  # TODO: Update URL
+            "update_check_url": "https://api.github.com/repos/bekmuradov/BrainDrive-Plugins/releases/latest",  # TODO: Update URL
             "last_update_check": None,
             "update_available": False,
             "latest_version": None,
@@ -128,11 +128,11 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
         # TEMPLATE: Define module data - TODO: Customize for your plugin's modules
         self.module_data = [
             {
-                "name": "PluginTemplate",  # TODO: Update module name
-                "display_name": "Plugin Template",  # TODO: Update display name
+                "name": "ChatWithYourDocuments",  # TODO: Update module name
+                "display_name": "Chat With Documents Interface",  # TODO: Update display name
                 "description": "A template component for BrainDrive plugins",  # TODO: Update description
                 "icon": "Puzzle",  # TODO: Choose appropriate icon
-                "category": "template",  # TODO: Choose appropriate category
+                "category": "ai",  # TODO: Choose appropriate category
                 "priority": 1,
                 "props": {
                     # TODO: Define default props for your plugin
@@ -189,67 +189,12 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
                     "defaultWidth": 6,
                     "defaultHeight": 6
                 },
-                "tags": ["template", "starter", "example"]  # TODO: Add relevant tags
-            },
-            {
-                "name": "SettingsExample",
-                "display_name": "Plugin Template Settings",
-                "description": "Settings configuration for the Plugin Template",
-                "icon": "Settings",
-                "category": "Configuration",
-                "priority": 2,
-                "props": {
-                    "title": "Plugin Template Settings",
-                    "description": "Configure the behavior and appearance of the Plugin Template"
-                },
-                "config_fields": {
-                    "api_endpoint": {
-                        "type": "text",
-                        "description": "API endpoint URL",
-                        "default": "https://api.example.com"
-                    },
-                    "enable_notifications": {
-                        "type": "boolean",
-                        "description": "Enable notifications",
-                        "default": True
-                    },
-                    "refresh_interval": {
-                        "type": "number",
-                        "description": "Refresh interval in seconds",
-                        "default": 30
-                    },
-                    "max_items": {
-                        "type": "number",
-                        "description": "Maximum number of items to display",
-                        "default": 50
-                    },
-                    "theme": {
-                        "type": "select",
-                        "description": "Theme preference",
-                        "default": "auto",
-                        "options": ["auto", "light", "dark"]
-                    }
-                },
-                "messages": {},
-                "required_services": {
-                    "settings": {"methods": ["getSetting", "setSetting"], "version": "1.0.0"},
-                    "api": {"methods": ["get", "post", "put", "delete"], "version": "1.0.0"},
-                    "theme": {"methods": ["getCurrentTheme", "addThemeChangeListener", "removeThemeChangeListener"], "version": "1.0.0"},
-
-                },
-                "dependencies": [],
-                "layout": {
-                    "minWidth": 6,
-                    "minHeight": 4,
-                    "defaultWidth": 8,
-                    "defaultHeight": 6
-                },
-                "tags": ["settings", "plugin_template_settings"]  # Special "settings" tag makes this appear in Settings page
+                "tags": ["ai", "chat", "conversation", "assistant", "collections", "chat-with-documents"]  # TODO: Add relevant tags
             }
         ]
         
         # Initialize base class with required parameters
-        logger.info(f"PluginTemplate: plugins_base_dir - {plugins_base_dir}")
+        logger.info(f"ChatWithYourDocuments: plugins_base_dir - {plugins_base_dir}")
         if plugins_base_dir:
             # When instantiated by the remote installer, plugins_base_dir points to the plugins directory
             # Shared plugins are stored under plugins_base_dir/shared/plugin_slug/version
@@ -258,7 +203,7 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             # When running from the PluginBuild directory during development,
             # resolve the path to backend/plugins/shared
             shared_path = Path(__file__).parent.parent.parent / "backend" / "plugins" / "shared" / self.plugin_data['plugin_slug'] / f"v{self.plugin_data['version']}"
-        logger.info(f"PluginTemplate: shared_path - {shared_path}")
+        logger.info(f"ChatWithYourDocuments: shared_path - {shared_path}")
         super().__init__(
             plugin_slug=self.plugin_data['plugin_slug'],
             version=self.plugin_data['version'],
@@ -286,7 +231,7 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             if not db_result['success']:
                 return db_result
             
-            logger.info(f"PluginTemplate: User installation completed for {user_id}")
+            logger.info(f"ChatWithYourDocuments: User installation completed for {user_id}")
             return {
                 'success': True,
                 'plugin_id': db_result['plugin_id'],
@@ -296,7 +241,7 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             }
             
         except Exception as e:
-            logger.error(f"PluginTemplate: User installation failed for {user_id}: {e}")
+            logger.error(f"ChatWithYourDocuments: User installation failed for {user_id}: {e}")
             return {'success': False, 'error': str(e)}
     
     async def _perform_user_uninstallation(self, user_id: str, db: AsyncSession) -> Dict[str, Any]:
@@ -314,7 +259,7 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             if not delete_result['success']:
                 return delete_result
             
-            logger.info(f"PluginTemplate: User uninstallation completed for {user_id}")
+            logger.info(f"ChatWithYourDocuments: User uninstallation completed for {user_id}")
             return {
                 'success': True,
                 'plugin_id': plugin_id,
@@ -322,12 +267,12 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             }
             
         except Exception as e:
-            logger.error(f"PluginTemplate: User uninstallation failed for {user_id}: {e}")
+            logger.error(f"ChatWithYourDocuments: User uninstallation failed for {user_id}: {e}")
             return {'success': False, 'error': str(e)}
     
     async def _copy_plugin_files_impl(self, user_id: str, target_dir: Path, update: bool = False) -> Dict[str, Any]:
         """
-        PluginTemplate-specific implementation of file copying.
+        ChatWithYourDocuments-specific implementation of file copying.
         This method is called by the base class during installation.
         Copies all files from the plugin source directory to the target directory.
         """
@@ -406,20 +351,20 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
                 copied_files.append('lifecycle_manager.py')
                 logger.info(f"Copied lifecycle_manager.py")
             
-            logger.info(f"PluginTemplate: Copied {len(copied_files)} files/directories to {target_dir}")
+            logger.info(f"ChatWithYourDocuments: Copied {len(copied_files)} files/directories to {target_dir}")
             return {'success': True, 'copied_files': copied_files}
             
         except Exception as e:
-            logger.error(f"PluginTemplate: Error copying plugin files: {e}")
+            logger.error(f"ChatWithYourDocuments: Error copying plugin files: {e}")
             return {'success': False, 'error': str(e)}
     
     async def _validate_installation_impl(self, user_id: str, plugin_dir: Path) -> Dict[str, Any]:
         """
-        PluginTemplate-specific validation logic.
+        ChatWithYourDocuments-specific validation logic.
         This method is called by the base class during installation.
         """
         try:
-            # Check for PluginTemplate-specific required files
+            # Check for ChatWithYourDocuments-specific required files
             required_files = ["package.json", "dist/remoteEntry.js"]
             missing_files = []
             
@@ -430,7 +375,7 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             if missing_files:
                 return {
                     'valid': False,
-                    'error': f"PluginTemplate: Missing required files: {', '.join(missing_files)}"
+                    'error': f"ChatWithYourDocuments: Missing required files: {', '.join(missing_files)}"
                 }
             
             # Validate package.json structure
@@ -445,13 +390,13 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
                     if field not in package_data:
                         return {
                             'valid': False,
-                            'error': f'PluginTemplate: package.json missing required field: {field}'
+                            'error': f'ChatWithYourDocuments: package.json missing required field: {field}'
                         }
                         
             except (json.JSONDecodeError, FileNotFoundError) as e:
                 return {
                     'valid': False,
-                    'error': f'PluginTemplate: Invalid or missing package.json: {e}'
+                    'error': f'ChatWithYourDocuments: Invalid or missing package.json: {e}'
                 }
             
             # Validate bundle file exists and is not empty
@@ -459,19 +404,19 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             if bundle_path.stat().st_size == 0:
                 return {
                     'valid': False,
-                    'error': 'PluginTemplate: Bundle file (remoteEntry.js) is empty'
+                    'error': 'ChatWithYourDocuments: Bundle file (remoteEntry.js) is empty'
                 }
             
-            logger.info(f"PluginTemplate: Installation validation passed for user {user_id}")
+            logger.info(f"ChatWithYourDocuments: Installation validation passed for user {user_id}")
             return {'valid': True}
             
         except Exception as e:
-            logger.error(f"PluginTemplate: Error validating installation: {e}")
+            logger.error(f"ChatWithYourDocuments: Error validating installation: {e}")
             return {'valid': False, 'error': str(e)}
     
     async def _get_plugin_health_impl(self, user_id: str, plugin_dir: Path) -> Dict[str, Any]:
         """
-        PluginTemplate-specific health check logic.
+        ChatWithYourDocuments-specific health check logic.
         This method is called by the base class during status checks.
         """
         try:
@@ -516,7 +461,7 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             }
             
         except Exception as e:
-            logger.error(f"PluginTemplate: Error checking plugin health: {e}")
+            logger.error(f"ChatWithYourDocuments: Error checking plugin health: {e}")
             return {
                 'healthy': False,
                 'details': {'error': str(e)}
@@ -526,13 +471,13 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
         """Check if plugin already exists for user"""
         try:
             plugin_slug = self.plugin_data['plugin_slug']
-            logger.info(f"PluginTemplate: Checking for existing plugin - user_id: {user_id}, plugin_slug: {plugin_slug}")
+            logger.info(f"ChatWithYourDocuments: Checking for existing plugin - user_id: {user_id}, plugin_slug: {plugin_slug}")
             
             # First test database connectivity
             test_query = text("SELECT COUNT(*) as count FROM plugin")
             test_result = await db.execute(test_query)
             test_row = test_result.fetchone()
-            logger.info(f"PluginTemplate: Database connectivity test - total plugins: {test_row.count}")
+            logger.info(f"ChatWithYourDocuments: Database connectivity test - total plugins: {test_row.count}")
             
             plugin_query = text("""
             SELECT id, name, version, enabled, created_at, updated_at, plugin_slug
@@ -544,14 +489,14 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
                 'user_id': user_id,
                 'plugin_slug': plugin_slug
             }
-            logger.info(f"PluginTemplate: Executing query with params: {query_params}")
+            logger.info(f"ChatWithYourDocuments: Executing query with params: {query_params}")
             
             result = await db.execute(plugin_query, query_params)
             
             plugin_row = result.fetchone()
-            logger.info(f"PluginTemplate: Query result: {plugin_row}")
+            logger.info(f"ChatWithYourDocuments: Query result: {plugin_row}")
             if plugin_row:
-                logger.info(f"PluginTemplate: Found existing plugin - id: {plugin_row.id}, name: {plugin_row.name}")
+                logger.info(f"ChatWithYourDocuments: Found existing plugin - id: {plugin_row.id}, name: {plugin_row.name}")
                 return {
                     'exists': True,
                     'plugin_id': plugin_row.id,
@@ -565,23 +510,23 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
                     }
                 }
             else:
-                logger.warning(f"PluginTemplate: No plugin found for user_id: {user_id}, plugin_slug: {plugin_slug}")
+                logger.warning(f"ChatWithYourDocuments: No plugin found for user_id: {user_id}, plugin_slug: {plugin_slug}")
                 
                 # Debug: Check if there are any plugins for this user
                 debug_query = text("SELECT id, plugin_slug FROM plugin WHERE user_id = :user_id")
                 debug_result = await db.execute(debug_query, {'user_id': user_id})
                 debug_rows = debug_result.fetchall()
                 if debug_rows:
-                    logger.info(f"PluginTemplate: User has {len(debug_rows)} other plugins:")
+                    logger.info(f"ChatWithYourDocuments: User has {len(debug_rows)} other plugins:")
                     for row in debug_rows:
                         logger.info(f"  - {row.plugin_slug} (id: {row.id})")
                 else:
-                    logger.info(f"PluginTemplate: User has no plugins installed")
+                    logger.info(f"ChatWithYourDocuments: User has no plugins installed")
                 
                 return {'exists': False}
                 
         except Exception as e:
-            logger.error(f"PluginTemplate: Error checking existing plugin: {e}")
+            logger.error(f"ChatWithYourDocuments: Error checking existing plugin: {e}")
             return {'exists': False, 'error': str(e)}
     
     async def _create_database_records(self, user_id: str, db: AsyncSession) -> Dict[str, Any]:
@@ -591,7 +536,7 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             plugin_slug = self.plugin_data['plugin_slug']
             plugin_id = f"{user_id}_{plugin_slug}"
             
-            logger.info(f"PluginTemplate: Creating database records - user_id: {user_id}, plugin_slug: {plugin_slug}, plugin_id: {plugin_id}")
+            logger.info(f"ChatWithYourDocuments: Creating database records - user_id: {user_id}, plugin_slug: {plugin_slug}, plugin_id: {plugin_id}")
             
             plugin_stmt = text("""
             INSERT INTO plugin
@@ -688,7 +633,7 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             
             # Commit the transaction
             await db.commit()
-            logger.info(f"PluginTemplate: Database transaction committed successfully")
+            logger.info(f"ChatWithYourDocuments: Database transaction committed successfully")
             
             # Verify the plugin was actually created
             verify_query = text("SELECT id, plugin_slug FROM plugin WHERE id = :plugin_id AND user_id = :user_id")
@@ -696,9 +641,9 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             verify_row = verify_result.fetchone()
             
             if verify_row:
-                logger.info(f"PluginTemplate: Successfully created and verified database records for plugin {plugin_id} with {len(modules_created)} modules")
+                logger.info(f"ChatWithYourDocuments: Successfully created and verified database records for plugin {plugin_id} with {len(modules_created)} modules")
             else:
-                logger.error(f"PluginTemplate: Plugin creation appeared to succeed but verification failed for plugin_id: {plugin_id}")
+                logger.error(f"ChatWithYourDocuments: Plugin creation appeared to succeed but verification failed for plugin_id: {plugin_id}")
                 return {'success': False, 'error': 'Plugin creation verification failed'}
             
             return {'success': True, 'plugin_id': plugin_id, 'modules_created': modules_created}
@@ -804,18 +749,18 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
                 'export_timestamp': datetime.datetime.now().isoformat()
             }
             
-            logger.info(f"PluginTemplate: Exported user data for {user_id}")
+            logger.info(f"ChatWithYourDocuments: Exported user data for {user_id}")
             return {'success': True, 'user_data': user_data}
             
         except Exception as e:
-            logger.error(f"PluginTemplate: Error exporting user data: {e}")
+            logger.error(f"ChatWithYourDocuments: Error exporting user data: {e}")
             return {'success': False, 'error': str(e)}
     
     async def _import_user_data(self, user_id: str, db: AsyncSession, user_data: Dict[str, Any]):
         """Import user-specific data after migration during updates"""
         try:
             if not user_data:
-                logger.info(f"PluginTemplate: No user data to import for {user_id}")
+                logger.info(f"ChatWithYourDocuments: No user data to import for {user_id}")
                 return
             
             plugin_config = user_data.get('plugin_config', {})
@@ -854,10 +799,10 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
                     'user_id': user_id
                 })
             
-            logger.info(f"PluginTemplate: Imported user data for {user_id}")
+            logger.info(f"ChatWithYourDocuments: Imported user data for {user_id}")
             
         except Exception as e:
-            logger.error(f"PluginTemplate: Error importing user data: {e}")
+            logger.error(f"ChatWithYourDocuments: Error importing user data: {e}")
             raise
     
     def get_plugin_info(self) -> Dict[str, Any]:
@@ -871,14 +816,14 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
     
     # Compatibility methods for old interface
     async def install_plugin(self, user_id: str, db: AsyncSession) -> Dict[str, Any]:
-        """Install PluginTemplate plugin for specific user (compatibility method)"""
+        """Install ChatWithYourDocuments plugin for specific user (compatibility method)"""
         try:
-            logger.info(f"PluginTemplate: Starting installation for user {user_id}")
+            logger.info(f"ChatWithYourDocuments: Starting installation for user {user_id}")
             
             # Check if plugin is already installed for this user
             existing_check = await self._check_existing_plugin(user_id, db)
             if existing_check['exists']:
-                logger.warning(f"PluginTemplate: Plugin already installed for user {user_id}")
+                logger.warning(f"ChatWithYourDocuments: Plugin already installed for user {user_id}")
                 return {
                     'success': False,
                     'error': 'Plugin already installed for user',
@@ -887,15 +832,15 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             
             shared_path = self.shared_path
             shared_path.mkdir(parents=True, exist_ok=True)
-            logger.info(f"PluginTemplate: Created shared directory: {shared_path}")
+            logger.info(f"ChatWithYourDocuments: Created shared directory: {shared_path}")
 
             # Copy plugin files to the shared directory first
             copy_result = await self._copy_plugin_files_impl(user_id, shared_path)
             if not copy_result['success']:
-                logger.error(f"PluginTemplate: File copying failed: {copy_result.get('error')}")
+                logger.error(f"ChatWithYourDocuments: File copying failed: {copy_result.get('error')}")
                 return copy_result
 
-            logger.info(f"PluginTemplate: Files copied successfully, proceeding with database installation")
+            logger.info(f"ChatWithYourDocuments: Files copied successfully, proceeding with database installation")
             
             # Ensure we're in a transaction
             try:
@@ -905,21 +850,21 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
                     # Verify the installation was successful
                     verify_check = await self._check_existing_plugin(user_id, db)
                     if not verify_check['exists']:
-                        logger.error(f"PluginTemplate: Installation appeared successful but verification failed")
+                        logger.error(f"ChatWithYourDocuments: Installation appeared successful but verification failed")
                         return {'success': False, 'error': 'Installation verification failed'}
                     
-                    logger.info(f"PluginTemplate: Installation verified successfully for user {user_id}")
+                    logger.info(f"ChatWithYourDocuments: Installation verified successfully for user {user_id}")
                     result.update({
                         'plugin_slug': self.plugin_data['plugin_slug'],
                         'plugin_name': self.plugin_data['name']
                     })
                 else:
-                    logger.error(f"PluginTemplate: Database installation failed: {result.get('error')}")
+                    logger.error(f"ChatWithYourDocuments: Database installation failed: {result.get('error')}")
                 
                 return result
                 
             except Exception as db_error:
-                logger.error(f"PluginTemplate: Database operation failed: {db_error}")
+                logger.error(f"ChatWithYourDocuments: Database operation failed: {db_error}")
                 # Try to rollback if possible
                 try:
                     await db.rollback()
@@ -928,30 +873,30 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
                 return {'success': False, 'error': f'Database operation failed: {str(db_error)}'}
                 
         except Exception as e:
-            logger.error(f"PluginTemplate: Install plugin failed: {e}")
+            logger.error(f"ChatWithYourDocuments: Install plugin failed: {e}")
             return {'success': False, 'error': str(e)}
     
     async def delete_plugin(self, user_id: str, db: AsyncSession) -> Dict[str, Any]:
-        """Delete PluginTemplate plugin for user (compatibility method)"""
+        """Delete ChatWithYourDocuments plugin for user (compatibility method)"""
         try:
-            logger.info(f"PluginTemplate: Starting deletion for user {user_id}")
+            logger.info(f"ChatWithYourDocuments: Starting deletion for user {user_id}")
             
             # Let the base class handle the deletion - it will call _perform_user_uninstallation
             # which includes the database check
             result = await self.uninstall_for_user(user_id, db)
             
             if result.get('success'):
-                logger.info(f"PluginTemplate: Successfully deleted plugin for user {user_id}")
+                logger.info(f"ChatWithYourDocuments: Successfully deleted plugin for user {user_id}")
             else:
-                logger.error(f"PluginTemplate: Deletion failed: {result.get('error')}")
+                logger.error(f"ChatWithYourDocuments: Deletion failed: {result.get('error')}")
             
             return result
         except Exception as e:
-            logger.error(f"PluginTemplate: Delete plugin failed: {e}")
+            logger.error(f"ChatWithYourDocuments: Delete plugin failed: {e}")
             return {'success': False, 'error': str(e)}
     
     async def get_plugin_status(self, user_id: str, db: AsyncSession) -> Dict[str, Any]:
-        """Get current status of PluginTemplate plugin installation (compatibility method)"""
+        """Get current status of ChatWithYourDocuments plugin installation (compatibility method)"""
         try:
             existing_check = await self._check_existing_plugin(user_id, db)
             if not existing_check['exists']:
@@ -969,11 +914,11 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             }
             
         except Exception as e:
-            logger.error(f"PluginTemplate: Error checking plugin status: {e}")
+            logger.error(f"ChatWithYourDocuments: Error checking plugin status: {e}")
             return {'exists': False, 'status': 'error', 'error': str(e)}
     
-    async def update_plugin(self, user_id: str, db: AsyncSession, new_version_manager: 'PluginTemplateLifecycleManager') -> Dict[str, Any]:
-        """Update PluginTemplate plugin for user (compatibility method)"""
+    async def update_plugin(self, user_id: str, db: AsyncSession, new_version_manager: 'ChatWithYourDocumentsLifecycleManager') -> Dict[str, Any]:
+        """Update ChatWithYourDocuments plugin for user (compatibility method)"""
         try:
             # Export current user data
             export_result = await self._export_user_data(user_id, db)
@@ -993,7 +938,7 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             # Import user data to new version
             await new_version_manager._import_user_data(user_id, db, export_result.get('user_data', {}))
             
-            logger.info(f"PluginTemplate: Plugin updated successfully for user {user_id}")
+            logger.info(f"ChatWithYourDocuments: Plugin updated successfully for user {user_id}")
             return {
                 'success': True,
                 'old_version': self.version,
@@ -1002,25 +947,25 @@ class PluginTemplateLifecycleManager(BaseLifecycleManager):
             }
             
         except Exception as e:
-            logger.error(f"PluginTemplate: Plugin update failed for user {user_id}: {e}")
+            logger.error(f"ChatWithYourDocuments: Plugin update failed for user {user_id}: {e}")
             return {'success': False, 'error': str(e)}
 
 
 # Standalone functions for compatibility with remote installer
 async def install_plugin(user_id: str, db: AsyncSession, plugins_base_dir: str = None) -> Dict[str, Any]:
-    manager = PluginTemplateLifecycleManager(plugins_base_dir)
+    manager = ChatWithYourDocumentsLifecycleManager(plugins_base_dir)
     return await manager.install_plugin(user_id, db)
 
 async def delete_plugin(user_id: str, db: AsyncSession, plugins_base_dir: str = None) -> Dict[str, Any]:
-    manager = PluginTemplateLifecycleManager(plugins_base_dir)
+    manager = ChatWithYourDocumentsLifecycleManager(plugins_base_dir)
     return await manager.delete_plugin(user_id, db)
 
 async def get_plugin_status(user_id: str, db: AsyncSession, plugins_base_dir: str = None) -> Dict[str, Any]:
-    manager = PluginTemplateLifecycleManager(plugins_base_dir)
+    manager = ChatWithYourDocumentsLifecycleManager(plugins_base_dir)
     return await manager.get_plugin_status(user_id, db)
 
-async def update_plugin(user_id: str, db: AsyncSession, new_version_manager: 'PluginTemplateLifecycleManager', plugins_base_dir: str = None) -> Dict[str, Any]:
-    old_manager = PluginTemplateLifecycleManager(plugins_base_dir)
+async def update_plugin(user_id: str, db: AsyncSession, new_version_manager: 'ChatWithYourDocumentsLifecycleManager', plugins_base_dir: str = None) -> Dict[str, Any]:
+    old_manager = ChatWithYourDocumentsLifecycleManager(plugins_base_dir)
     return await old_manager.update_plugin(user_id, db, new_version_manager)
 
 
@@ -1030,11 +975,11 @@ if __name__ == "__main__":
     import asyncio
     
     async def main():
-        print("PluginTemplate Plugin Lifecycle Manager - Test Mode")
+        print("ChatWithYourDocuments Plugin Lifecycle Manager - Test Mode")
         print("=" * 50)
         
         # Test manager initialization
-        manager = PluginTemplateLifecycleManager()
+        manager = ChatWithYourDocumentsLifecycleManager()
         print(f"Plugin: {manager.plugin_data['name']}")
         print(f"Version: {manager.plugin_data['version']}")
         print(f"Slug: {manager.plugin_data['plugin_slug']}")
