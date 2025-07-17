@@ -19,6 +19,9 @@ import { ChatView, CollectionsView, DocumentsView } from './components';
 import { ChatCollectionsAppProps, ViewType, Collection, ChatSession } from './custom-types';
 
 
+// Version information
+export const version = '1.0.0';
+
 // Main App Component
 export const ChatCollectionsApp: React.FC<ChatCollectionsAppProps> = ({
   initialView = ViewType.COLLECTIONS,
