@@ -1,4 +1,5 @@
 import React from 'react';
+import './PluginTemplate.css';
 import { 
   Plus, 
   Upload, 
@@ -32,6 +33,7 @@ interface ChatCollectionsAppState {
   chatMessages: any[];
   loading: boolean;
   error: string | null;
+  currentTheme: 'dark' | 'light';
 }
 
 // Main App Component as Class
@@ -48,6 +50,7 @@ export class ChatCollectionsApp extends React.Component<ChatCollectionsAppProps,
       chatMessages: [],
       loading: false,
       error: null,
+      currentTheme: 'light',
     };
 
     // Bind handlers
@@ -184,10 +187,11 @@ export class ChatCollectionsApp extends React.Component<ChatCollectionsAppProps,
       chatSessions,
       chatMessages,
       error,
+      currentTheme,
     } = this.state;
 
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className={`min-h-screen bg-gray-50 plugin-template ${currentTheme === 'dark' ? 'dark-theme' : ''}`}>
         {/* Header */}
         <div className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 py-4">
