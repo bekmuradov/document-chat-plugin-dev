@@ -142,7 +142,7 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
       <div>
         <div className="flex justify-between items-center mb-6">
           <div className="px-4 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">Your Collections</h3>
+            <h2 className="text-lg leading-6 font-medium text-gray-900">Your Collections</h2>
             <p className="max-w-2xl text-sm text-gray-500">Organize your documents into collections for better management</p>
           </div>
           <div className="flex items-center space-x-4">
