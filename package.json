@@ -10,7 +10,8 @@
     "clean": "rm -rf dist",
     "pack:zip": "npm run build && cd dist && zip -r ../artifact.zip .",
     "pack:tar": "npm run build && cd dist && tar -czf ../artifact.tar.gz .",
-    "test": "ts-node --transpile-only --require ./test_setup.js test_component.js"
+    "test": "ts-node --transpile-only --require ./test_setup.js test_component.js",
+    "test-dom": "ts-node --transpile-only --require ./tests/test_dom_setup.js ./tests/test_component.js"
   },
   "keywords": [
     "braindrive",
@@ -32,6 +33,7 @@
     "@types/react-dom": "^18.2.0",
     "css-loader": "^6.8.1",
     "html-webpack-plugin": "^5.5.3",
+    "jsdom": "^26.1.0",
     "semantic-release": "^24.2.7",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.4.4",
