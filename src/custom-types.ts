@@ -38,18 +38,16 @@ export interface Collection {
 
 export interface Document {
   id: string;
-  collection_id: string;
   original_filename: string;
   file_size: number;
   document_type: string;
-  chunk_count: number;
+  collection_id: string;
   status: DocumentStatus;
   created_at: string;
   processed_at: string;
   error_message?: string;
-  processing_progress?: number;
-  content_preview?: string;
   metadata?: object;
+  chunk_count: number;
 }
 
 export interface ChatSession {
