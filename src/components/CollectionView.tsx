@@ -134,7 +134,10 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
     return (
       <div>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Your Collections</h2>
+          <div className="px-4 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">Your Collections</h3>
+            <p className="max-w-2xl text-sm text-gray-500">Organize your documents into collections for better management</p>
+          </div>
           <button
             onClick={this.handleShowCreateForm} // Use bound handler
             className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
