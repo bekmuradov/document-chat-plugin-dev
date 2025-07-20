@@ -205,19 +205,6 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
     //   services.event.on('chat:message:sent', this.handleChatMessageSent.bind(this));
     // }
 
-    // Load plugin settings
-    if (services.settings) {
-      try {
-        const savedConfig = await services.settings.getSetting('chat_collections_config');
-        if (savedConfig) {
-          // Apply saved configuration
-          console.log('ChatCollectionsPlugin: Loaded saved config:', savedConfig);
-        }
-      } catch (error) {
-        console.warn('ChatCollectionsPlugin: Failed to load settings:', error);
-      }
-    }
-
     // Set up refresh interval if configured
     const refreshInterval = this.props.config?.refreshInterval;
     if (refreshInterval && refreshInterval > 0) {
