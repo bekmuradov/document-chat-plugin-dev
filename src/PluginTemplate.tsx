@@ -1,18 +1,11 @@
 import React from 'react';
 import './PluginTemplate.css';
 import { 
-  Plus, 
-  Upload, 
-  Trash2, 
   MessageSquare, 
   FileText, 
-  Send, 
   Loader2,
   ArrowLeft,
-  FolderOpen,
   AlertCircle,
-  CheckCircle,
-  Clock
 } from 'lucide-react';
 import { ChatView, CollectionsView, DocumentsView } from './components';
 import { API_BASE } from './config';
@@ -79,30 +72,6 @@ interface PageContext {
   isStudioPage?: boolean;
 }
 
-// enum ViewType {
-//   COLLECTIONS = 'collections',
-//   DOCUMENTS = 'documents',
-//   CHAT = 'chat'
-// }
-
-// interface Collection {
-//   id: string;
-//   name: string;
-//   description?: string;
-//   created_at: string;
-//   updated_at: string;
-//   document_count?: number;
-// }
-
-// interface ChatSession {
-//   id: string;
-//   name: string;
-//   collection_id: string;
-//   created_at: string;
-//   updated_at: string;
-//   message_count?: number;
-// }
-
 interface ChatCollectionsPluginState {
   currentView: ViewType;
   selectedCollection: Collection | null;
@@ -131,6 +100,7 @@ interface ChatCollectionsPluginState {
  * - Error handling and loading states
  */
 class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, ChatCollectionsPluginState> {
+  private _isMounted: boolean = false;
   private themeChangeListener: ((theme: TemplateTheme) => void) | null = null;
   private pageContextUnsubscribe: (() => void) | null = null;
   private refreshInterval: NodeJS.Timeout | null = null;
@@ -140,7 +110,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
     super(props);
     
     // Initialize API base URL from config or default
-    this.apiBaseUrl = API_BASE;
+    this.apiBaseUrl = props.config?.apiBaseUrl || API_BASE;
     
     this.state = {
       currentView: ViewType.COLLECTIONS,
@@ -168,6 +138,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
   }
 
   async componentDidMount() {
+    this._isMounted = true;
     try {
       await this.initializeServices();
       await this.loadInitialData();
@@ -182,6 +153,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
     this.cleanupServices();
   }
 
@@ -330,8 +302,41 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
     }
   }
 
+  /**
+   * Simple test method for component validation
+   * Returns plugin status and configuration info
+   */
+  getPluginInfo() {
+    return {
+      name: 'ChatCollectionsPlugin',
+      version: '1.0.0',
+      status: 'initialized',
+      apiBaseUrl: this.apiBaseUrl,
+      hasServices: {
+        api: !!this.props.services.api,
+        theme: !!this.props.services.theme,
+        event: !!this.props.services.event,
+        settings: !!this.props.services.settings,
+        pageContext: !!this.props.services.pageContext
+      },
+      currentState: {
+        currentView: this.state.currentView,
+        collectionsCount: this.state.collections.length,
+        hasSelectedCollection: !!this.state.selectedCollection,
+        isLoading: this.state.loading,
+        hasError: !!this.state.error,
+        theme: this.state.currentTheme,
+        isInitializing: this.state.isInitializing
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
   // API methods using BrainDrive services
   async loadCollections() {
+    if (!this._isMounted && !this.state) {
+      return;
+    }
     try {
       const { services } = this.props;
       let response;
