@@ -2,9 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import ChatCollectionsPlugin from './PluginTemplate';
 import './PluginTemplate.css';
+import type { Services } from './types';
 
 // Mock services for standalone development
-const mockServices = {
+const mockServices: Services = {
   api: {
     get: async (url: string) => {
       console.log('Mock API GET:', url);
@@ -89,27 +90,15 @@ const mockServices = {
       return { success: true, id: Math.random().toString(36) };
     },
     
-    put: async (url: string, data?: any) => {
-      console.log('Mock API PUT:', url, data);
-      return { success: true };
-    },
+    // put: async (url: string, data?: any) => {
+    //   console.log('Mock API PUT:', url, data);
+    //   return { success: true };
+    // },
     
-    delete: async (url: string) => {
-      console.log('Mock API DELETE:', url);
-      return { success: true };
-    }
-  },
-  
-  event: {
-    emit: (event: string, data?: any) => {
-      console.log('Mock Event Emit:', event, data);
-    },
-    on: (event: string, handler: (data: any) => void) => {
-      console.log('Mock Event On:', event);
-    },
-    off: (event: string, handler: (data: any) => void) => {
-      console.log('Mock Event Off:', event);
-    }
+    // delete: async (url: string) => {
+    //   console.log('Mock API DELETE:', url);
+    //   return { success: true };
+    // }
   },
   
   theme: {
@@ -148,6 +137,84 @@ const mockServices = {
     }
   }
 };
+
+function isDOMException(error: unknown): error is DOMException {
+  return error instanceof DOMException;
+}
+
+function isTypeError(error: unknown): error is TypeError {
+  return error instanceof TypeError;
+}
+
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
+const componentServices: Services = {
+  api: {
+    get: async (url) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log(`✓ API GET response received: ${JSON.stringify(data).substring(0, 100)}...`);
+        return data;
+      } catch (error) {
+        clearTimeout(timeoutId);
+
+        // Handle fetch timeout/abort errors (DOMException)
+        if (isDOMException(error) && error.name === 'AbortError') {
+          console.error('❌ API request timed out:', url);
+          throw new Error('Request timed out after 10 seconds');
+        }
+        // Handle network/fetch errors (TypeError)
+        else if (isTypeError(error)) {
+          console.error('❌ Network error:', error);
+          throw new Error(`Network error: ${error.message}`);
+        }
+        // Handle other known Error types
+        else if (isError(error)) {
+          console.error('❌ API GET error:', error);
+          throw error; // Re-throw original error to preserve stack trace
+        }
+        // Fallback for unknown error types
+        else {
+          console.error('❌ Unknown error type:', error);
+          throw new Error(`An unknown error occurred: ${String(error)}`);
+        }
+      }
+    },
+    post: async (url, data) => {
+      console.log(`Making API POST request to: ${url}`);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    }
+  }
+}
 
 // Development wrapper component
 const DevWrapper: React.FC = () => {
@@ -216,7 +283,7 @@ const DevWrapper: React.FC = () => {
             autoSave: true
           }
         }}
-        services={mockServices}
+        services={componentServices}
       />
     </div>
   );
