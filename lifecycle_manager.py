@@ -141,7 +141,8 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                     "config": {
                         "refreshInterval": 60000,
                         "showAdvancedOptions": False,
-                        "customSetting": "default"
+                        "apiBaseUrl": "http://localhost:8000",
+                        "maxDocuments": 100
                     }
                 },
                 "config_fields": {
