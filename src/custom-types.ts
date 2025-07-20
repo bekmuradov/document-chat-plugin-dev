@@ -110,6 +110,11 @@ export interface CollectionsViewState {
   isCreating: boolean;
 }
 
+export enum CollectionViewType {
+  GRID = 'grid',
+  LIST = 'list'
+}
+
 // Collection Form Event Handlers
 export type CollectionFormSubmitHandler = (form: CreateCollectionForm) => Promise<void>;
 export type CollectionFormChangeHandler = (field: keyof CreateCollectionForm, value: string) => void;

@@ -1,17 +1,18 @@
 import React from 'react';
-import {
-  Plus,
-  FolderOpen,
-} from 'lucide-react';
+import {Plus} from 'lucide-react';
 
-import { API_BASE } from '../config';
-import { CollectionsViewProps, Collection } from '../custom-types';
-import { Utils } from '../utils';
+import { API_BASE } from '../../config';
+import { CollectionsViewProps, Collection, CollectionViewType } from '../../custom-types';
+import { Utils } from '../../utils';
+import { NoCollections } from './NoCollections';
+import { CollectionsList } from './CollectionsList';
+import { CollectionViewModeToggle } from './CollectionViewModeToggle';
 
 // Define the state interface for the class component
 interface CollectionsViewState {
   showCreateForm: boolean;
   newCollection: Partial<Collection>;
+  currentViewMode: CollectionViewType;
 }
 
 /**
@@ -29,7 +30,8 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
         name: '',
         description: '',
         color: '#3B82F6' // Default color for new collections
-      }
+      },
+      currentViewMode: CollectionViewType.LIST
     };
 
     // Bind event handlers to the component instance
@@ -40,6 +42,7 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
     this.handleColorChange = this.handleColorChange.bind(this);
     this.handleShowCreateForm = this.handleShowCreateForm.bind(this);
     this.handleCancelCreateForm = this.handleCancelCreateForm.bind(this);
+    this.handleViewModeChange = this.handleViewModeChange.bind(this);
   }
 
   /**
@@ -126,10 +129,14 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
     this.setState({ showCreateForm: false });
   }
 
+  handleViewModeChange(viewType: CollectionViewType) {
+    this.setState({ currentViewMode: viewType })
+  }
+
   render() {
     // Destructure props and state for easier access in render method
     const { collections, onCollectionSelect } = this.props;
-    const { showCreateForm, newCollection } = this.state;
+    const { showCreateForm, newCollection, currentViewMode } = this.state;
 
     return (
       <div>
@@ -138,13 +145,20 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
             <h3 className="text-lg leading-6 font-medium text-gray-900">Your Collections</h3>
             <p className="max-w-2xl text-sm text-gray-500">Organize your documents into collections for better management</p>
           </div>
-          <button
-            onClick={this.handleShowCreateForm} // Use bound handler
-            className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Collection
-          </button>
+          <div className="flex items-center space-x-4">
+            <CollectionViewModeToggle 
+                currentViewMode={currentViewMode}
+                onViewModeChange={this.handleViewModeChange}
+            />
+            
+            <button
+                onClick={this.handleShowCreateForm}
+                className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
+            >
+                <Plus className="h-4 w-4 mr-2" />
+                New Collection
+            </button>
+          </div>
         </div>
 
         {/* Create Collection Form */}
@@ -159,7 +173,7 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
                 <input
                   type="text"
                   value={newCollection.name}
-                  onChange={this.handleNameChange} // Use bound handler
+                  onChange={this.handleNameChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter collection name"
                 />
@@ -170,7 +184,7 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
                 </label>
                 <textarea
                   value={newCollection.description}
-                  onChange={this.handleDescriptionChange} // Use bound handler
+                  onChange={this.handleDescriptionChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={3}
                   placeholder="Enter collection description"
@@ -183,20 +197,20 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
                 <input
                   type="color"
                   value={newCollection.color}
-                  onChange={this.handleColorChange} // Use bound handler
+                  onChange={this.handleColorChange}
                   className="w-20 h-10 border border-gray-300 rounded-lg"
                 />
               </div>
               <div className="flex space-x-3">
                 <button
-                  onClick={this.handleCreateCollection} // Use bound handler
+                  onClick={this.handleCreateCollection}
                   disabled={!newCollection.name?.trim() || !newCollection.description?.trim()}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
                   Create Collection
                 </button>
                 <button
-                  onClick={this.handleCancelCreateForm} // Use bound handler
+                  onClick={this.handleCancelCreateForm}
                   className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
                 >
                   Cancel
@@ -206,38 +220,11 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
           </div>
         )}
 
-        {/* Collections Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {collections.map((collection) => (
-            <div
-              key={collection.id}
-              className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => onCollectionSelect(collection)}
-            >
-              <div className="p-6">
-                <div className="flex items-center mb-4">
-                  <div
-                    className="w-4 h-4 rounded-full mr-3"
-                    style={{ backgroundColor: collection.color }}
-                  />
-                  <h3 className="text-lg font-medium text-gray-900">{collection.name}</h3>
-                </div>
-                <p className="text-gray-600 mb-4">{collection.description}</p>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>{collection.document_count} documents</span>
-                  <span>{Utils.formatDate(collection.created_at)}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {collections.length === 0 && (
-          <div className="text-center py-12">
-            <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No collections yet</h3>
-            <p className="text-gray-600">Create your first collection to get started</p>
-          </div>
+        {/* Collections Section */}
+        {collections.length === 0 ? (
+          <NoCollections />
+        ) : (
+          <CollectionsList collections={collections} onCollectionSelect={onCollectionSelect} viewMode={currentViewMode} />
         )}
       </div>
     );
