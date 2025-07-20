@@ -12,10 +12,10 @@ export enum MessageRole {
 }
 
 export enum DocumentStatus {
-  UPLOADING = 'uploading',
+  UPLOADED = 'uploaded',
   PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed'
+  PROCESSED = 'processed',
+  FAILED = 'failed',
 }
 
 export enum ChatSessionStatus {
@@ -39,17 +39,17 @@ export interface Collection {
 export interface Document {
   id: string;
   collection_id: string;
-  name: string;
   original_filename: string;
   file_size: number;
   document_type: string;
   chunk_count: number;
   status: DocumentStatus;
   created_at: string;
-  updated_at: string;
+  processed_at: string;
   error_message?: string;
   processing_progress?: number;
   content_preview?: string;
+  metadata?: object;
 }
 
 export interface ChatSession {
