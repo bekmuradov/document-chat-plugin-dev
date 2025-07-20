@@ -9,7 +9,8 @@
     "start": "webpack serve --mode development",
     "clean": "rm -rf dist",
     "pack:zip": "npm run build && cd dist && zip -r ../artifact.zip .",
-    "pack:tar": "npm run build && cd dist && tar -czf ../artifact.tar.gz ."
+    "pack:tar": "npm run build && cd dist && tar -czf ../artifact.tar.gz .",
+    "test": "ts-node --transpile-only --require ./test_setup.js test_component_v5.js"
   },
   "keywords": [
     "braindrive",
@@ -25,6 +26,8 @@
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/github": "^11.0.3",
     "@semantic-release/release-notes-generator": "^14.0.3",
+    "@types/node": "^24.0.15",
+    "@types/node-fetch": "^2.6.12",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "css-loader": "^6.8.1",
@@ -32,6 +35,7 @@
     "semantic-release": "^24.2.7",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.4.4",
+    "ts-node": "^10.9.2",
     "typescript": "^5.1.6",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
@@ -39,6 +43,7 @@
   },
   "dependencies": {
     "lucide-react": "^0.525.0",
+    "node-fetch": "^3.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
