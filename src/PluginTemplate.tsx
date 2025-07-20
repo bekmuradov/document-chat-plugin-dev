@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { ChatView, CollectionsView, DocumentsView } from './components';
 import { API_BASE } from './config';
-import { Collection, ChatSession, ViewType } from './custom-types';
+import { Collection, ChatSession, ViewType, Document, ChatMessage } from './custom-types';
 
 // Version information
 export const version = '1.0.0';
@@ -76,9 +76,9 @@ interface ChatCollectionsPluginState {
   selectedCollection: Collection | null;
   selectedChatSession: ChatSession | null;
   collections: Collection[];
-  documents: any[];
+  documents: Document[];
   chatSessions: ChatSession[];
-  chatMessages: any[];
+  chatMessages: ChatMessage[];
   loading: boolean;
   error: string | null;
   currentTheme: TemplateTheme;
@@ -418,7 +418,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
     });
 
     // Emit event for other plugins
-    if (this.props.services.event) {
+    if (this.props.services.event && this.props.services.event.emit) {
       this.props.services.event.emit('collection:selected', collection);
     }
   }
@@ -430,7 +430,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
     });
 
     // Emit event for other plugins
-    if (this.props.services.event) {
+    if (this.props.services.event && this.props.services.event.emit) {
       this.props.services.event.emit('chat:session:selected', session);
     }
   }

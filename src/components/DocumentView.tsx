@@ -94,6 +94,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     formData.append('collection_id', this.props.collection.id);
 
     try {
+      Utils.showLoading();
       const response = await fetch(`${API_BASE}/documents/`, {
         method: 'POST',
         body: formData,
@@ -119,7 +120,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
         uploadedDocument.id,
         // onStatusUpdate callback
         (updatedDoc) => {
-          this.setState(prevState => ({
+          this.setState((prevState) => ({
             documents: prevState.documents.map(doc =>
               doc.id === uploadedDocument.id
                 ? { ...updatedDoc, isPlaceholder: false }
@@ -137,7 +138,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
           onError: (error) => {
             Utils.showToast(`Error polling document status: ${error}`, 'error');
             // Remove the document from local state on error
-            this.setState(prevState => ({
+            this.setState((prevState) => ({
               documents: prevState.documents.filter(doc => doc.id !== uploadedDocument.id)
             }));
           }
