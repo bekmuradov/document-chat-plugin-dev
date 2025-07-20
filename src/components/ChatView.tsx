@@ -85,14 +85,14 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
             <div key={message.id} className="space-y-3">
               {/* User Message */}
               <div className="flex justify-end">
-                <div className="bg-blue-600 text-white px-4 py-2 rounded-lg max-w-xs lg:max-w-md">
+                <div className="bg-blue-600 text-white px-4 py-2 rounded-lg w-[85%]">
                   {message.user_message}
                 </div>
               </div>
 
               {/* Assistant Response */}
               <div className="flex justify-start">
-                <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg max-w-xs lg:max-w-md">
+                <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg w-[85%]">
                   {message.assistant_response}
                 </div>
               </div>
