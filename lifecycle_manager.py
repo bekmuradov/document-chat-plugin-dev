@@ -178,7 +178,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                     "api": {"methods": ["get", "post", "put", "delete"], "version": "1.0.0"},
                     "theme": {"methods": ["getCurrentTheme", "addThemeChangeListener", "removeThemeChangeListener"], "version": "1.0.0"},
                     "settings": {"methods": ["getSetting", "setSetting", "getSettingDefinitions"], "version": "1.0.0"},
-                    "event": {"methods": ["sendMessage", "subscribeToMessages", "unsubscribeFromMessages"], "version": "1.0.0"},
+                    "event": {"methods": ["sendMessage", "subscribeToMessages", "unsubscribeFromMessages", "on", "off", "emit"], "version": "1.0.0"},
                     "pageContext": {"methods": ["getCurrentPageContext", "onPageContextChange"], "version": "1.0.0"}
                 },
                 "dependencies": [],
