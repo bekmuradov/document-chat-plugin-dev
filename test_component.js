@@ -1,4 +1,3 @@
-// Enhanced test to verify component loading AND method execution
 const React = require('react');
 
 // Test function with actual component instantiation and method calling
