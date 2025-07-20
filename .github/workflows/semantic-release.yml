@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run DOM tests
+        run: npm run test-dom
+
       - name: Build & Package
         run: |
           npm run pack:zip
