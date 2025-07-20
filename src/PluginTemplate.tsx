@@ -10,38 +10,32 @@ import {
 import { ChatView, CollectionsView, DocumentsView } from './components';
 import { API_BASE } from './config';
 import { Collection, ChatSession, ViewType, Document, ChatMessage } from './custom-types';
+import type { Services, TemplateTheme } from './types';
 
 // Version information
 export const version = '1.0.0';
 
-type TemplateTheme = 'dark' | 'light';
-
-interface Services {
-  api?: {
-    get: (url: string) => Promise<any>;
-    post: (url: string, data?: any) => Promise<any>;
-    put: (url: string, data?: any) => Promise<any>;
-    delete: (url: string) => Promise<any>;
-  };
-  event?: {
-    emit: (event: string, data?: any) => void;
-    on: (event: string, handler: (data: any) => void) => void;
-    off: (event: string, handler: (data: any) => void) => void;
-  };
-  theme?: {
-    getCurrentTheme: () => TemplateTheme;
-    addThemeChangeListener: (listener: (theme: TemplateTheme) => void) => void;
-    removeThemeChangeListener: (listener: (theme: TemplateTheme) => void) => void;
-  };
-  settings?: {
-    getSetting: (key: string) => Promise<any>;
-    setSetting: (key: string, value: any) => Promise<void>;
-  };
-  pageContext?: {
-    getCurrentPageContext: () => PageContext;
-    onPageContextChange: (handler: (context: PageContext) => void) => () => void;
-  };
-}
+// interface Services {
+//   api?: {
+//     get: (url: string) => Promise<any>;
+//     post: (url: string, data?: any) => Promise<any>;
+//     put: (url: string, data?: any) => Promise<any>;
+//     delete: (url: string) => Promise<any>;
+//   };
+//   theme?: {
+//     getCurrentTheme: () => TemplateTheme;
+//     addThemeChangeListener: (listener: (theme: TemplateTheme) => void) => void;
+//     removeThemeChangeListener: (listener: (theme: TemplateTheme) => void) => void;
+//   };
+//   settings?: {
+//     getSetting: (key: string) => Promise<any>;
+//     setSetting: (key: string, value: any) => Promise<void>;
+//   };
+//   pageContext?: {
+//     getCurrentPageContext: () => PageContext;
+//     onPageContextChange: (handler: (context: PageContext) => void) => () => void;
+//   };
+// }
 
 interface ChatCollectionsConfig {
   apiBaseUrl?: string;
@@ -301,7 +295,6 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
       hasServices: {
         api: !!this.props.services.api,
         theme: !!this.props.services.theme,
-        event: !!this.props.services.event,
         settings: !!this.props.services.settings,
         pageContext: !!this.props.services.pageContext
       },
@@ -418,9 +411,9 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
     });
 
     // Emit event for other plugins
-    if (this.props.services.event && this.props.services.event.emit) {
-      this.props.services.event.emit('collection:selected', collection);
-    }
+    // if (this.props.services.event && this.props.services.event.emit) {
+    //   this.props.services.event.emit('collection:selected', collection);
+    // }
   }
 
   handleChatSessionSelect(session: ChatSession) {
@@ -430,9 +423,9 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
     });
 
     // Emit event for other plugins
-    if (this.props.services.event && this.props.services.event.emit) {
-      this.props.services.event.emit('chat:session:selected', session);
-    }
+    // if (this.props.services.event && this.props.services.event.emit) {
+    //   this.props.services.event.emit('chat:session:selected', session);
+    // }
   }
 
   handleBack() {

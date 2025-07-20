@@ -6,6 +6,7 @@ import {
 
 import { API_BASE } from '../config';
 import { CollectionsViewProps, Collection } from '../custom-types';
+import { Utils } from '../utils';
 
 // Define the state interface for the class component
 interface CollectionsViewState {
@@ -136,7 +137,7 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
           <h2 className="text-xl font-semibold text-gray-900">Your Collections</h2>
           <button
             onClick={this.handleShowCreateForm} // Use bound handler
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+            className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
           >
             <Plus className="h-4 w-4 mr-2" />
             New Collection
@@ -221,7 +222,7 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
                 <p className="text-gray-600 mb-4">{collection.description}</p>
                 <div className="flex items-center justify-between text-sm text-gray-500">
                   <span>{collection.document_count} documents</span>
-                  <span>{new Date(collection.created_at).toLocaleDateString()}</span>
+                  <span>{Utils.formatDate(collection.created_at)}</span>
                 </div>
               </div>
             </div>

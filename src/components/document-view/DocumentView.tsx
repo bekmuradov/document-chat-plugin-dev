@@ -11,16 +11,37 @@ import {
   Clock
 } from 'lucide-react';
 
-import { API_BASE } from '../config';
-import { DocumentsViewProps } from '../custom-types';
-import { Utils } from '../utils';
+import { API_BASE } from '../../config';
+import { DocumentsViewProps, DocumentStatus, Document } from '../../custom-types';
+import { Utils } from '../../utils';
+import { ChatSessions } from './ChatSessions';
+import { DocumentList } from './DocumentList';
+
+interface DocumentWithPlaceholder extends Document {
+  isPlaceholder?: boolean;
+}
 
 interface DocumentsViewState {
   uploading: boolean;
   showSessionForm: boolean;
   newSessionName: string;
-  documents: any[];
+  documents: DocumentWithPlaceholder[];
 }
+
+const initialState: Document[] = [
+    {
+        "id": "563e9d97-84f3-4ea7-94b9-my-test-id",
+        "original_filename": "Project Overview.docx",
+        "file_size": 19109,
+        "document_type": "docx",
+        "collection_id": "699e163a-5e18-4d70-8ea5-bb4cad5922fb",
+        "status": DocumentStatus.PROCESSING,
+        "created_at": "2025-07-04T20:41:20.263928",
+        "processed_at": "2025-07-04T20:42:01.074257",
+        "metadata": {},
+        "chunk_count": 1
+    }
+]
 
 export class DocumentsView extends React.Component<DocumentsViewProps, DocumentsViewState> {
   fileInputRef: React.RefObject<HTMLInputElement>;
@@ -46,6 +67,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     if (prevProps.documents !== this.props.documents) {
       this.setState((prevState) => ({
         documents: [
+          ...initialState,
           // Keep placeholders
           ...prevState.documents.filter(doc => doc.isPlaceholder),
           // Add real documents
@@ -127,11 +149,15 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
                 : doc
             )
           }));
+          console.log("Updated doc: ", updatedDoc);
+
+          console.log("State documents: ", this.state.documents);
         },
         // options
         {
           apiBase: API_BASE,
           onComplete: (finalDoc) => {
+            this.setState({ uploading: false });
             // Refresh the parent component's document list
             this.props.onDocumentUpload();
           },
@@ -154,7 +180,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
         documents: prevState.documents.filter(doc => doc.id !== placeholderDoc.id)
       }));
     } finally {
-      this.setState({ uploading: false });
+      // this.setState({ uploading: false });
       Utils.hideLoading();
       e.target.value = '';
     }
@@ -227,22 +253,15 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     }
   }
 
-  getStatusIcon(status: string) {
-    switch (status) {
-      case 'PROCESSED':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'PROCESSING':
-        return <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />;
-      case 'FAILED':
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return <Clock className="h-5 w-5 text-gray-500" />;
-    }
-  }
+  // TODO: Implement chat session delete with propagation
+  // handleDeleteSession(event, sessionId) {
+  //     event.stopPropagation();
+  //     this.deleteSession(sessionId);
+  // }
 
   render() {
-    const { documents, chatSessions, onChatSessionSelect } = this.props;
-    const { uploading, showSessionForm, newSessionName } = this.state;
+    const { chatSessions, onChatSessionSelect } = this.props;
+    const { uploading, showSessionForm, newSessionName, documents } = this.state;
 
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -273,41 +292,8 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border">
-            {documents.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No documents yet</h3>
-                <p className="text-gray-600">Upload your first document to get started</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {documents.map((doc) => (
-                  <div key={doc.id} className="p-4 hover:bg-gray-50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        {this.getStatusIcon(doc.status)}
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-900">{doc.original_filename}</h4>
-                          <p className="text-sm text-gray-500">
-                            {doc.document_type} • {(doc.file_size / 1024).toFixed(1)} KB
-                            {doc.chunk_count > 0 && ` • ${doc.chunk_count} chunks`}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => this.handleDocumentDelete(doc.id, doc.original_filename)}
-                        className="text-red-600 hover:text-red-900"
-                        title={`Delete ${doc.original_filename}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Documents list here */}
+          <DocumentList documents={documents} onDocumentDelete={this.handleDocumentDelete} />
         </div>
 
         {/* Chat Sessions Section */}
@@ -358,30 +344,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow-sm border">
-            {chatSessions.length === 0 ? (
-              <div className="text-center py-8">
-                <MessageSquare className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-                <h3 className="text-sm font-medium text-gray-900 mb-1">No chat sessions</h3>
-                <p className="text-xs text-gray-600">Create a session to start chatting</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {chatSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className="p-3 hover:bg-gray-50 cursor-pointer"
-                    onClick={() => onChatSessionSelect(session)}
-                  >
-                    <h4 className="text-sm font-medium text-gray-900">{session.name}</h4>
-                    <p className="text-xs text-gray-500">
-                      {session.message_count} messages • {new Date(session.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <ChatSessions chatSessions={chatSessions} onChatSessionSelect={onChatSessionSelect} />
         </div>
       </div>
     );

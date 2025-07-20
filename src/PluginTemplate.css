@@ -211,3 +211,27 @@
     animation: none;
   }
 }
+
+.chat-session-item:hover .delete-session-btn {
+    @apply opacity-100;
+}
+
+.delete-session-btn {
+    @apply transition-opacity duration-200;
+}
+
+.delete-session-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.chat-session-item:hover .delete-session-btn {
+    opacity: 1;
+}
+
+.delete-session-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.chat-session-item:hover .delete-session-btn {
+    opacity: 1;
+}
