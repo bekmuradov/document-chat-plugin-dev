@@ -17,6 +17,57 @@ export interface FileValidationResult {
 export class Utils {
   private static toastContainer: HTMLElement | null = null;
   private static toastCounter = 0;
+  private static loadingOverlay: HTMLElement | null = null;
+  private static activePollingIntervals: Map<string, NodeJS.Timeout> = new Map();
+
+  /**
+   * Initialize loading overlay - call this once when your app starts
+   */
+  static initLoadingOverlay(): void {
+    if (document.getElementById('loading-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'loading-overlay';
+    overlay.className = `
+      fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden
+      backdrop-blur-sm
+    `.replace(/\s+/g, ' ').trim();
+
+    overlay.innerHTML = `
+      <div class="bg-white rounded-lg p-6 flex items-center space-x-4 shadow-xl">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span class="text-gray-700 font-medium">Loading...</span>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    this.loadingOverlay = overlay;
+  }
+
+  /**
+   * Show loading overlay
+   */
+  static showLoading(message = 'Loading...'): void {
+    if (!this.loadingOverlay) {
+      this.initLoadingOverlay();
+    }
+
+    const messageEl = this.loadingOverlay!.querySelector('span');
+    if (messageEl) {
+      messageEl.textContent = message;
+    }
+
+    this.loadingOverlay!.classList.remove('hidden');
+  }
+
+  /**
+   * Hide loading overlay
+   */
+  static hideLoading(): void {
+    if (this.loadingOverlay) {
+      this.loadingOverlay.classList.add('hidden');
+    }
+  }
 
   /**
    * Initialize toast container - call this once when your app starts
@@ -318,6 +369,135 @@ export class Utils {
    */
   static sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Poll document status until processing is complete
+   */
+  static pollDocumentStatus(
+    documentId: string,
+    onStatusUpdate: (document: any) => void,
+    options: {
+      apiBase?: string;
+      pollInterval?: number;
+      maxAttempts?: number;
+      onComplete?: (document: any) => void;
+      onError?: (error: string) => void;
+    } = {}
+  ): void {
+    const {
+      apiBase = '/api', // Adjust based on your API base
+      pollInterval = 2000,
+      maxAttempts = 60,
+      onComplete,
+      onError
+    } = options;
+
+    // Clear any existing polling for this document
+    this.stopPollingDocument(documentId);
+
+    let attempts = 0;
+
+    const intervalId = setInterval(async () => {
+      attempts++;
+
+      try {
+        const response = await fetch(`${apiBase}/documents/${documentId}`);
+        
+        if (!response.ok) {
+          console.warn(`Polling document ${documentId} failed: ${response.status}`);
+          if (response.status === 404) {
+            // Document not found, stop polling
+            this.stopPollingDocument(documentId);
+            onError?.('Document not found');
+            return;
+          }
+          return;
+        }
+
+        const updatedDocument = await response.json();
+        
+        // Call the status update callback
+        onStatusUpdate(updatedDocument);
+
+        // Check if processing is complete
+        if (updatedDocument.status !== 'processing' && updatedDocument.status !== 'uploaded') {
+          this.stopPollingDocument(documentId);
+          
+          if (updatedDocument.status === 'processed') {
+            this.showToast(`Document "${updatedDocument.original_filename}" processed and ready.`, 'success');
+          } else if (updatedDocument.status === 'failed') {
+            this.showToast(`Document "${updatedDocument.original_filename}" processing failed.`, 'error');
+          }
+          
+          onComplete?.(updatedDocument);
+          return;
+        }
+
+      } catch (error) {
+        console.error(`Error polling document status: ${error}`);
+        
+        // After too many errors, stop polling
+        if (attempts >= 5) {
+          this.stopPollingDocument(documentId);
+          onError?.(`Failed to poll document status: ${error}`);
+          return;
+        }
+      }
+
+      // Stop after max attempts
+      if (attempts >= maxAttempts) {
+        this.stopPollingDocument(documentId);
+        console.warn(`Stopped polling status for document ${documentId} after ${attempts} attempts.`);
+        onError?.('Polling timeout - document may still be processing');
+      }
+    }, pollInterval);
+
+    // Store the interval ID for potential cleanup
+    this.activePollingIntervals.set(documentId, intervalId);
+  }
+
+  /**
+   * Stop polling for a specific document
+   */
+  static stopPollingDocument(documentId: string): void {
+    const intervalId = this.activePollingIntervals.get(documentId);
+    if (intervalId) {
+      clearInterval(intervalId);
+      this.activePollingIntervals.delete(documentId);
+    }
+  }
+
+  /**
+   * Stop all active polling
+   */
+  static stopAllPolling(): void {
+    this.activePollingIntervals.forEach((intervalId) => {
+      clearInterval(intervalId);
+    });
+    this.activePollingIntervals.clear();
+  }
+
+  /**
+   * Create a temporary placeholder document for immediate UI feedback
+   */
+  static createPlaceholderDocument(file: File, collectionId: string): any {
+    const tempId = 'temp-' + Math.random().toString(36).substring(2, 9);
+    return {
+      id: tempId,
+      filename: '',
+      original_filename: file.name,
+      file_path: '',
+      file_size: file.size,
+      document_type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
+      collection_id: collectionId,
+      status: 'processing',
+      created_at: new Date().toISOString(),
+      processed_at: null,
+      metadata: {},
+      chunk_count: 0,
+      isPlaceholder: true
+    };
   }
 }
 

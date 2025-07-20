@@ -19,6 +19,7 @@ interface DocumentsViewState {
   uploading: boolean;
   showSessionForm: boolean;
   newSessionName: string;
+  documents: any[];
 }
 
 export class DocumentsView extends React.Component<DocumentsViewProps, DocumentsViewState> {
@@ -30,6 +31,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       uploading: false,
       showSessionForm: false,
       newSessionName: '',
+      documents: [...(props.documents || [])],
     };
     this.fileInputRef = React.createRef();
 
@@ -37,6 +39,25 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     this.handleFileUpload = this.handleFileUpload.bind(this);
     this.handleDocumentDelete = this.handleDocumentDelete.bind(this);
     this.handleCreateSession = this.handleCreateSession.bind(this);
+  }
+
+  componentDidUpdate(prevProps: DocumentsViewProps) {
+    // Update local documents when props change (but preserve placeholders)
+    if (prevProps.documents !== this.props.documents) {
+      this.setState((prevState) => ({
+        documents: [
+          // Keep placeholders
+          ...prevState.documents.filter(doc => doc.isPlaceholder),
+          // Add real documents
+          ...(this.props.documents || [])
+        ]
+      }));
+    }
+  }
+
+  componentWillUnmount() {
+    // Clean up any active polling when component unmounts
+    Utils.stopAllPolling();
   }
 
   async handleFileUpload(e: ChangeEvent<HTMLInputElement>) {
@@ -59,6 +80,14 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       return;
     }
 
+    // 1. Create placeholder document for immediate UI feedback
+    const placeholderDoc = Utils.createPlaceholderDocument(file, this.props.collection.id);
+    
+    // Add placeholder to local state
+    this.setState((prevState) => ({
+      documents: [placeholderDoc, ...prevState.documents]
+    }));
+
     this.setState({ uploading: true });
     const formData = new FormData();
     formData.append('file', file);
@@ -74,12 +103,58 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
         throw new Error(`Failed to upload document: ${response.statusText}`);
       }
 
+      const uploadedDocument = await response.json();
       Utils.showToast(`Successfully uploaded "${file.name}"`, 'success');
-      this.props.onDocumentUpload();
+
+      // 2. Replace placeholder with actual document
+      this.setState((prevState) => ({
+        documents: prevState.documents.map(doc => 
+          doc.id === placeholderDoc.id 
+            ? { ...uploadedDocument, isPlaceholder: false }
+            : doc
+        )
+      }));
+      // 3. Start polling for document status
+      Utils.pollDocumentStatus(
+        uploadedDocument.id,
+        // onStatusUpdate callback
+        (updatedDoc) => {
+          this.setState(prevState => ({
+            documents: prevState.documents.map(doc =>
+              doc.id === uploadedDocument.id
+                ? { ...updatedDoc, isPlaceholder: false }
+                : doc
+            )
+          }));
+        },
+        // options
+        {
+          apiBase: API_BASE,
+          onComplete: (finalDoc) => {
+            // Refresh the parent component's document list
+            this.props.onDocumentUpload();
+          },
+          onError: (error) => {
+            Utils.showToast(`Error polling document status: ${error}`, 'error');
+            // Remove the document from local state on error
+            this.setState(prevState => ({
+              documents: prevState.documents.filter(doc => doc.id !== uploadedDocument.id)
+            }));
+          }
+        }
+      );
     } catch (err: any) {
-      this.props.setError(err.message);
+      const errorMessage = err.message || 'Failed to upload document';
+      Utils.showToast(errorMessage, 'error');
+      this.props.setError(errorMessage);
+
+      // Remove placeholder on error
+      this.setState(prevState => ({
+        documents: prevState.documents.filter(doc => doc.id !== placeholderDoc.id)
+      }));
     } finally {
       this.setState({ uploading: false });
+      Utils.hideLoading();
       e.target.value = '';
     }
   }
@@ -87,7 +162,12 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
   async handleDocumentDelete(documentId: string, documentName: string) {
     if (!confirm(`Are you sure you want to delete "${documentName}"?`)) return;
 
+    Utils.showLoading(`Deleting "${documentName}"...`);
+
     try {
+      // Stop any active polling for this document
+      Utils.stopPollingDocument(documentId);
+
       const response = await fetch(`${API_BASE}/documents/${documentId}`, {
         method: 'DELETE',
       });
@@ -97,11 +177,19 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       }
 
       Utils.showToast(`Successfully deleted "${documentName}"`, 'success');
+
+      // Remove from local state immediately
+      this.setState(prevState => ({
+        documents: prevState.documents.filter(doc => doc.id !== documentId)
+      }));
+
       this.props.onDocumentDelete();
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to delete document';
       Utils.showToast(errorMessage, 'error');
       this.props.setError(errorMessage);
+    } finally {
+      Utils.hideLoading();
     }
   }
 
