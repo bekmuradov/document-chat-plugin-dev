@@ -3,14 +3,12 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { ModuleFederationPlugin } = require("webpack").container;
 const deps = require("./package.json").dependencies;
 
-// TEMPLATE: Customize these values for your plugin
-const PLUGIN_PORT = 3033; // TODO: Change this to an available port
+const PLUGIN_PORT = 3033;
 
 module.exports = {
   mode: "development",
   entry: "./src/index",
   output: {
-    //path: path.resolve(__dirname, '/path to your install/BrainDrive/backend/plugins/shared/PluginTemplate/v1.0.0/dist'),
     path: path.resolve(__dirname, 'dist'),
     publicPath: "auto",
     clean: true,
@@ -27,7 +25,12 @@ module.exports = {
       {
         test: /\.(ts|tsx)$/,
         use: "ts-loader",
-        exclude: /node_modules/,
+        exclude: [
+          /node_modules/,
+          /\.test\.(ts|tsx)$/,
+          /\.spec\.(ts|tsx)$/,
+          path.resolve(__dirname, 'src/dev-standalone.tsx')
+        ],
       },
       {
         test: /\.css$/,
