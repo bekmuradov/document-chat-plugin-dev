@@ -199,11 +199,11 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
     }
 
     // Initialize event service for plugin communication
-    // if (services.event) {
-    //   services.event.on('collection:created', this.handleCollectionCreated.bind(this));
-    //   services.event.on('document:uploaded', this.handleDocumentUploaded.bind(this));
-    //   services.event.on('chat:message:sent', this.handleChatMessageSent.bind(this));
-    // }
+    if (services.event) {
+      services.event.on('collection:created', this.handleCollectionCreated.bind(this));
+      services.event.on('document:uploaded', this.handleDocumentUploaded.bind(this));
+      services.event.on('chat:message:sent', this.handleChatMessageSent.bind(this));
+    }
 
     // Load plugin settings
     if (services.settings) {
@@ -241,11 +241,11 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
       this.pageContextUnsubscribe();
     }
     
-    // if (services.event) {
-    //   services.event.off('collection:created', this.handleCollectionCreated);
-    //   services.event.off('document:uploaded', this.handleDocumentUploaded);
-    //   services.event.off('chat:message:sent', this.handleChatMessageSent);
-    // }
+    if (services.event) {
+      services.event.off('collection:created', this.handleCollectionCreated);
+      services.event.off('document:uploaded', this.handleDocumentUploaded);
+      services.event.off('chat:message:sent', this.handleChatMessageSent);
+    }
     
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
