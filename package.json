@@ -10,7 +10,7 @@
     "clean": "rm -rf dist",
     "pack:zip": "npm run build && cd dist && zip -r ../artifact.zip .",
     "pack:tar": "npm run build && cd dist && tar -czf ../artifact.tar.gz .",
-    "test": "ts-node --transpile-only --require ./test_setup.js test_component_v5.js"
+    "test": "ts-node --transpile-only --require ./test_setup.js test_component.js"
   },
   "keywords": [
     "braindrive",
