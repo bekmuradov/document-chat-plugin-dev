@@ -8,11 +8,6 @@ export const mockServices = {
     put: jest.fn().mockResolvedValue({ success: true }),
     delete: jest.fn().mockResolvedValue({ success: true })
   },
-  event: {
-    emit: jest.fn(),
-    on: jest.fn(),
-    off: jest.fn()
-  },
   theme: {
     getCurrentTheme: jest.fn().mockReturnValue('light'),
     addThemeChangeListener: jest.fn(),
