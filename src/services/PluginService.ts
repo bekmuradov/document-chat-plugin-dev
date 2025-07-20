@@ -1,12 +1,17 @@
 // TEMPLATE: Plugin service for handling business logic
 // TODO: Customize this service for your plugin's specific needs
 
-import { ApiService, PluginData } from '../types';
+import { ApiService, PluginData, ApiResponse } from '../types';
+
+interface IApiService extends ApiService {
+  put: (url: string, data: any, options?: any) => Promise<ApiResponse>;
+  delete: (url: string, options?: any) => Promise<ApiResponse>;
+}
 
 export class PluginService {
-  private apiService: ApiService | undefined;
+  private apiService: IApiService | undefined;
 
-  constructor(apiService?: ApiService) {
+  constructor(apiService?: IApiService) {
     this.apiService = apiService;
   }
 
