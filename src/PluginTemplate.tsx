@@ -14,28 +14,6 @@ import { Collection, ChatSession, ViewType } from './custom-types';
 // Version information
 export const version = '1.0.0';
 
-// Plugin Types
-interface ChatCollectionsPluginProps {
-  title?: string;
-  description?: string;
-  pluginId?: string;
-  moduleId?: string;
-  instanceId?: string;
-  config?: ChatCollectionsConfig;
-  services: Services;
-}
-
-interface ChatCollectionsConfig {
-  apiBaseUrl?: string;
-  refreshInterval?: number;
-  showAdvancedOptions?: boolean;
-  maxDocuments?: number;
-  chatSettings?: {
-    maxMessages?: number;
-    autoSave?: boolean;
-  };
-}
-
 type TemplateTheme = 'dark' | 'light';
 
 interface Services {
@@ -63,6 +41,27 @@ interface Services {
     getCurrentPageContext: () => PageContext;
     onPageContextChange: (handler: (context: PageContext) => void) => () => void;
   };
+}
+
+interface ChatCollectionsConfig {
+  apiBaseUrl?: string;
+  refreshInterval?: number;
+  showAdvancedOptions?: boolean;
+  maxDocuments?: number;
+  chatSettings?: {
+    maxMessages?: number;
+    autoSave?: boolean;
+  };
+}
+
+interface ChatCollectionsPluginProps {
+  title?: string;
+  description?: string;
+  pluginId?: string;
+  moduleId?: string;
+  instanceId?: string;
+  config?: ChatCollectionsConfig;
+  services: Services;
 }
 
 interface PageContext {
