@@ -5,9 +5,9 @@
 export interface ApiService {
   get: (url: string, options?: any) => Promise<ApiResponse>;
   post: (url: string, data: any, options?: any) => Promise<ApiResponse>;
-  put: (url: string, data: any, options?: any) => Promise<ApiResponse>;
-  delete: (url: string, options?: any) => Promise<ApiResponse>;
-  postStreaming?: (url: string, data: any, onChunk: (chunk: string) => void, options?: any) => Promise<ApiResponse>;
+  // put: (url: string, data: any, options?: any) => Promise<ApiResponse>;
+  // delete: (url: string, options?: any) => Promise<ApiResponse>;
+  // postStreaming?: (url: string, data: any, onChunk: (chunk: string) => void, options?: any) => Promise<ApiResponse>;
 }
 
 export interface EventService {
@@ -16,20 +16,22 @@ export interface EventService {
   unsubscribeFromMessages: (target: string, callback: (message: any) => void) => void;
 }
 
+export type TemplateTheme = 'dark' | 'light';
+
 export interface ThemeService {
-  getCurrentTheme: () => string;
-  setTheme: (theme: string) => void;
-  toggleTheme: () => void;
-  addThemeChangeListener: (callback: (theme: string) => void) => void;
-  removeThemeChangeListener: (callback: (theme: string) => void) => void;
+  getCurrentTheme: () => TemplateTheme;
+  // setTheme: (theme: TemplateTheme) => void;
+  // toggleTheme: () => void;
+  addThemeChangeListener: (callback: (theme: TemplateTheme) => void) => void;
+  removeThemeChangeListener: (callback: (theme: TemplateTheme) => void) => void;
 }
 
 export interface SettingsService {
-  get: (key: string) => any;
-  set: (key: string, value: any) => Promise<void>;
+  // get: (key: string) => any;
+  // set: (key: string, value: any) => Promise<void>;
   getSetting?: (id: string) => Promise<any>;
   setSetting?: (id: string, value: any) => Promise<any>;
-  getSettingDefinitions?: () => Promise<any>;
+  // getSettingDefinitions?: () => Promise<any>;
 }
 
 export interface PageContextService {
