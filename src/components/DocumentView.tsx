@@ -13,6 +13,7 @@ import {
 
 import { API_BASE } from '../config';
 import { DocumentsViewProps } from '../custom-types';
+import { Utils } from '../utils';
 
 interface DocumentsViewState {
   uploading: boolean;
@@ -42,6 +43,22 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Use the utility for file validation
+    const validation = Utils.validateFile(file, {
+      maxSizeBytes: 10 * 1024 * 1024, // 10MB
+      allowedExtensions: ['.pdf', '.doc', '.docx'],
+      allowedTypes: [
+        'application/pdf',
+        'application/msword',
+      ]
+    });
+
+    if (!validation.isValid) {
+      Utils.showToast(validation.error!, 'error');
+      e.target.value = '';
+      return;
+    }
+
     this.setState({ uploading: true });
     const formData = new FormData();
     formData.append('file', file);
@@ -53,7 +70,11 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Failed to upload document');
+      if (!response.ok) {
+        throw new Error(`Failed to upload document: ${response.statusText}`);
+      }
+
+      Utils.showToast(`Successfully uploaded "${file.name}"`, 'success');
       this.props.onDocumentUpload();
     } catch (err: any) {
       this.props.setError(err.message);
@@ -63,24 +84,35 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     }
   }
 
-  async handleDocumentDelete(documentId: string) {
-    if (!confirm('Are you sure you want to delete this document?')) return;
+  async handleDocumentDelete(documentId: string, documentName: string) {
+    if (!confirm(`Are you sure you want to delete "${documentName}"?`)) return;
 
     try {
       const response = await fetch(`${API_BASE}/documents/${documentId}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Failed to delete document');
+      if (!response.ok) {
+        throw new Error(`Failed to delete document: ${response.statusText}`);
+      }
+
+      Utils.showToast(`Successfully deleted "${documentName}"`, 'success');
       this.props.onDocumentDelete();
     } catch (err: any) {
-      this.props.setError(err.message);
+      const errorMessage = err.message || 'Failed to delete document';
+      Utils.showToast(errorMessage, 'error');
+      this.props.setError(errorMessage);
     }
   }
 
   async handleCreateSession() {
     const { newSessionName } = this.state;
-    if (!newSessionName.trim()) return;
+    const trimmedName = newSessionName.trim();
+
+    if (!trimmedName) {
+      Utils.showToast('Please enter a session name', 'warning');
+      return;
+    }
 
     try {
       const response = await fetch(`${API_BASE}/chat/sessions`, {
@@ -92,12 +124,17 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to create chat session');
+      if (!response.ok) {
+        throw new Error(`Failed to create chat session: ${response.statusText}`);
+      }
 
+      Utils.showToast(`Created session "${trimmedName}"`, 'success');
       this.setState({ newSessionName: '', showSessionForm: false });
       this.props.onChatSessionCreate();
     } catch (err: any) {
-      this.props.setError(err.message);
+      const errorMessage = err.message || 'Failed to create chat session';
+      Utils.showToast(errorMessage, 'error');
+      this.props.setError(errorMessage);
     }
   }
 
@@ -170,8 +207,9 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
                         </div>
                       </div>
                       <button
-                        onClick={() => this.handleDocumentDelete(doc.id)}
+                        onClick={() => this.handleDocumentDelete(doc.id, doc.original_filename)}
                         className="text-red-600 hover:text-red-900"
+                        title={`Delete ${doc.original_filename}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
