@@ -77,7 +77,7 @@ export class Utils {
 
     const container = document.createElement('div');
     container.id = 'toast-container';
-    container.className = 'fixed top-4 right-4 z-50 space-y-2 pointer-events-none';
+    container.className = 'fixed bottom-8 right-4 z-100 space-y-2 pointer-events-none';
     document.body.appendChild(container);
     this.toastContainer = container;
   }
@@ -85,7 +85,7 @@ export class Utils {
   /**
    * Show toast notification
    */
-  static showToast(message: string, type: ToastType = 'info', duration = 3000): void {
+  static showToast(message: string, type: ToastType = 'info', duration = 10000): void {
     // Ensure container exists
     if (!this.toastContainer) {
       this.initToastContainer();
@@ -336,6 +336,8 @@ export class Utils {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
       ...options
     });
   }
