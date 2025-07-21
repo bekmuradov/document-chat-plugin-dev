@@ -153,7 +153,7 @@ export class CollectionsView extends React.Component<CollectionsViewProps, Colle
             
             <button
                 onClick={this.handleShowCreateForm}
-                className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
+                className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm"
             >
                 <Plus className="h-4 w-4 mr-2" />
                 New Collection
