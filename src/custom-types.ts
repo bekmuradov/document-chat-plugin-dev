@@ -1,3 +1,5 @@
+import { ApiService } from "./types";
+
 // Enums
 export enum ViewType {
   COLLECTIONS = 'collections',
@@ -65,11 +67,11 @@ export interface ChatSession {
 export interface ChatMessage {
   id: string;
   session_id: string;
-  role: MessageRole;
   user_message: string;
   assistant_response: string;
   created_at: string;
   retrieved_chunks: string[];
+  isStreaming?: boolean;
   metadata?: {
     sources?: string[];
     confidence?: number;
@@ -130,6 +132,7 @@ export interface DocumentsViewProps {
 }
 
 export interface ChatViewProps {
+  apiService?: ApiService;
   session: ChatSession;
   messages: ChatMessage[];
   onMessageSent: () => void;

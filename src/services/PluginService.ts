@@ -1,6 +1,3 @@
-// TEMPLATE: Plugin service for handling business logic
-// TODO: Customize this service for your plugin's specific needs
-
 import { ApiService, PluginData, ApiResponse } from '../types';
 
 interface IApiService extends ApiService {

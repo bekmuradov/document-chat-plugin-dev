@@ -10,7 +10,7 @@ import {
 import { ChatView, CollectionsView, DocumentsView } from './components';
 import { API_BASE } from './config';
 import { Collection, ChatSession, ViewType, Document, ChatMessage } from './custom-types';
-import type { Services, TemplateTheme } from './types';
+import type { TemplateTheme } from './types';
 
 // Version information
 export const version = '1.0.0';
@@ -20,7 +20,7 @@ export const version = '1.0.0';
  * 1. List collection items - V
  * 2. make collections into scrollable list - V
  * 3. make documents into scrollable list - V
- * 4. make chat session into scrollable list
+ * 4. make chat session into scrollable list - V
  * 5. implement chat session delete func
  * 6. refactor components
  * 7. add chat streaming endpoint
@@ -28,29 +28,36 @@ export const version = '1.0.0';
  * 9. add layout toggle view - V
  * 10. implement download document
  * 11. implement content preview for document
+ * 12. add doc count to collection list view mode
+ * 13. add markdown rendering for chat interface
  */
 
-// interface Services {
-//   api?: {
-//     get: (url: string) => Promise<any>;
-//     post: (url: string, data?: any) => Promise<any>;
-//     put: (url: string, data?: any) => Promise<any>;
-//     delete: (url: string) => Promise<any>;
-//   };
-//   theme?: {
-//     getCurrentTheme: () => TemplateTheme;
-//     addThemeChangeListener: (listener: (theme: TemplateTheme) => void) => void;
-//     removeThemeChangeListener: (listener: (theme: TemplateTheme) => void) => void;
-//   };
-//   settings?: {
-//     getSetting: (key: string) => Promise<any>;
-//     setSetting: (key: string, value: any) => Promise<void>;
-//   };
-//   pageContext?: {
-//     getCurrentPageContext: () => PageContext;
-//     onPageContextChange: (handler: (context: PageContext) => void) => () => void;
-//   };
-// }
+interface Services {
+  api?: {
+    get: (url: string) => Promise<any>;
+    post: (url: string, data?: any) => Promise<any>;
+    put: (url: string, data?: any) => Promise<any>;
+    delete: (url: string) => Promise<any>;
+  };
+  // event: {
+  //   sendMessage: (target: string, message: any, options?: any) => void;
+  //   subscribeToMessages: (target: string, callback: (message: any) => void) => void;
+  //   unsubscribeFromMessages: (target: string, callback: (message: any) => void) => void;
+  // },
+  theme?: {
+    getCurrentTheme: () => TemplateTheme;
+    addThemeChangeListener: (listener: (theme: TemplateTheme) => void) => void;
+    removeThemeChangeListener: (listener: (theme: TemplateTheme) => void) => void;
+  };
+  settings?: {
+    getSetting?: (key: string) => Promise<any>;
+    setSetting?: (key: string, value: any) => Promise<void>;
+  };
+  pageContext?: {
+    getCurrentPageContext: () => PageContext | null;
+    onPageContextChange: (handler: (context: PageContext) => void) => () => void;
+  };
+}
 
 interface ChatCollectionsConfig {
   apiBaseUrl?: string;
@@ -509,6 +516,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
       chatMessages,
       error,
     } = this.state;
+    const {services} = this.props;
 
     return (
       <div className="chat-collections-plugin-content">
@@ -603,6 +611,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
           {currentView === ViewType.CHAT && selectedChatSession && (
             <ChatView
               session={selectedChatSession}
+              apiService={this.props.services.api}
               messages={chatMessages}
               onMessageSent={() => this.loadChatMessages(selectedChatSession.id)}
               setError={(msg) => this.setState({ error: msg })}

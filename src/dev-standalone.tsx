@@ -2,7 +2,30 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import ChatCollectionsPlugin from './PluginTemplate';
 import './PluginTemplate.css';
-import type { Services } from './types';
+import type { Services, TemplateTheme } from './types';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import { API_BASE } from './config';
+
+// Hot Module Replacement (HMR) setup - this must be at the top level
+if (module.hot) {
+  console.log('🔥 Hot Module Replacement is enabled');
+  
+  // Add visual feedback for hot reloads
+  module.hot.addStatusHandler(function(status) {
+    if (status === 'apply') {
+      const indicator = document.querySelector('.hot-reload-indicator');
+      if (indicator) {
+        (indicator as HTMLElement).style.background = '#ffa500';
+        indicator.textContent = '🔄 Reloading...';
+        setTimeout(() => {
+          (indicator as HTMLElement).style.background = '#00d4aa';
+          indicator.textContent = '🔥 Hot Reload Active';
+        }, 1000);
+      }
+    }
+  });
+}
 
 // Mock services for standalone development
 const mockServices: Services = {
@@ -90,15 +113,15 @@ const mockServices: Services = {
       return { success: true, id: Math.random().toString(36) };
     },
     
-    // put: async (url: string, data?: any) => {
-    //   console.log('Mock API PUT:', url, data);
-    //   return { success: true };
-    // },
+    put: async (url: string, data?: any) => {
+      console.log('Mock API PUT:', url, data);
+      return { success: true };
+    },
     
-    // delete: async (url: string) => {
-    //   console.log('Mock API DELETE:', url);
-    //   return { success: true };
-    // }
+    delete: async (url: string) => {
+      console.log('Mock API DELETE:', url);
+      return { success: true };
+    }
   },
   
   theme: {
@@ -212,6 +235,145 @@ const componentServices: Services = {
       }
       
       return await response.json();
+    },
+    put: async (url: string, data: any) => {
+      console.log('Mock API PUT:', url, data);
+      return {
+        data: { success: true },
+        status: 200,
+        responseTime: Math.floor(Math.random() * 100) + 50,
+        timestamp: new Date().toISOString()
+      };
+    },
+    delete: async (url: string) => {
+      console.log('Mock API DELETE:', url);
+      return {
+        data: { success: true },
+        status: 200,
+        responseTime: Math.floor(Math.random() * 100) + 50,
+        timestamp: new Date().toISOString()
+      };
+    },
+    postStreaming: async<T = any>(
+      url: string,
+      data?: any,
+      onChunk?: (chunk: string) => void,
+      config?: AxiosRequestConfig
+    ): Promise<T> => {
+      // const url = `${API_BASE}${path}`;
+      const token = localStorage.getItem('accessToken');
+      let accumulated = '';
+    
+      const payload = data;  // ✅ Use full payload structure expected by backend
+    
+      // console.log('Connecting to streaming endpoint:', url);
+      // console.log('Payload sent:', payload);
+    
+      return new Promise<T>((resolve, reject) => {
+        fetchEventSource(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify(payload),
+          openWhenHidden: true,
+    
+          async onopen(response: Response): Promise<void> {
+            const type = response.headers.get('content-type') || '';
+            if (!response.ok || !type.includes('text/event-stream')) {
+              reject(new Error(`Unexpected response: ${response.status} ${type}`));
+              return Promise.resolve();
+            } else {
+              // console.log('✅ SSE connection established');
+              return Promise.resolve();
+            }
+          },
+    
+          onmessage(event) {
+            if (event.data === '[DONE]') {
+              // console.log('✅ Streaming completed');
+              resolve(accumulated as unknown as T);
+              return;
+            }
+    
+            try {
+              // console.log('Received chunk:', event.data);
+              accumulated += event.data;
+              onChunk?.(event.data);
+            } catch (err) {
+              console.warn('⚠️ Error handling streamed chunk:', event.data, err);
+            }
+          },
+    
+          onerror(err) {
+            console.error('❌ Stream error:', err);
+            reject(err);
+          }
+        });
+      });
+    }
+  },
+  settings: {
+    // get: (key: string) => {
+    //   console.log('Mock settings get:', key);
+    //   return null;
+    // },
+    // set: async (key: string, value: any) => {
+    //   console.log('Mock settings set:', key, value);
+    // },
+    getSetting: async (id: string) => {
+      console.log('Mock getSetting:', id);
+      return null;
+    },
+    setSetting: async (id: string, value: any) => {
+      console.log('Mock setSetting:', id, value);
+    }
+  },
+  theme: {
+    getCurrentTheme: () => {
+      const currentTheme = (localStorage.getItem('mock-theme') || 'light') as TemplateTheme;
+      return currentTheme;
+    },
+    // setTheme: (theme: string) => {
+    //   console.log('Mock setTheme:', theme);
+    //   localStorage.setItem('mock-theme', theme);
+    //   // Trigger theme change listeners
+    //   const event = new CustomEvent('mock-theme-change', { detail: theme });
+    //   window.dispatchEvent(event);
+    // },
+    // toggleTheme: () => {
+    //   const currentTheme = localStorage.getItem('mock-theme') || 'light';
+    //   const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    //   console.log('Mock toggleTheme:', currentTheme, '->', newTheme);
+    //   localStorage.setItem('mock-theme', newTheme);
+    //   // Trigger theme change listeners
+    //   const event = new CustomEvent('mock-theme-change', { detail: newTheme });
+    //   window.dispatchEvent(event);
+    // },
+    addThemeChangeListener: (callback: (theme: TemplateTheme) => void) => {
+      console.log('Mock theme listener added');
+      const handler = (event: CustomEvent) => callback(event.detail);
+      window.addEventListener('mock-theme-change', handler as EventListener);
+      // Simulate theme change after 5 seconds for testing
+      // setTimeout(() => callback('dark'), 5000);
+    },
+    removeThemeChangeListener: (callback: (theme: TemplateTheme) => void) => {
+      console.log('Mock theme listener removed');
+      // In a real implementation, you'd need to track and remove the specific listener
+    }
+  },
+  pageContext: {
+    getCurrentPageContext: () => ({
+      pageId: 'dev-page',
+      pageName: 'Development Page',
+      pageRoute: '/dev',
+      isStudioPage: false
+    }),
+    onPageContextChange: (callback: (context: any) => void) => {
+      console.log('Mock page context listener added');
+      return () => console.log('Mock page context listener removed');
     }
   }
 }
@@ -312,3 +474,10 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// HMR acceptance for this module
+if (module.hot) {
+  module.hot.accept('./PluginTemplate', () => {
+    console.log('🔄 PluginTemplate updated via HMR');
+  });
+}

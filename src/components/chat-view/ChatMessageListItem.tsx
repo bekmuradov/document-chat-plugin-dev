@@ -1,7 +1,7 @@
 import React from 'react';
-import type { ChatMessage } from '../../custom-types';
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
+import type { ChatMessage } from '../../custom-types';
 
 
 interface ChatMessageItemProps {

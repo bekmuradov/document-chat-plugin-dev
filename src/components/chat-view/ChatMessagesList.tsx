@@ -1,5 +1,5 @@
 import React from "react";
-import { Send, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import type { ChatMessage } from "../../custom-types";
 import { ChatMessageListItem } from "./ChatMessageListItem";

@@ -113,26 +113,6 @@
         // Development helpers
         window.devMode = true;
         
-        // Log webpack hot module replacement status
-        if (module.hot) {
-            console.log('🔥 Hot Module Replacement is enabled');
-            
-            // Add visual feedback for hot reloads
-            module.hot.addStatusHandler(function(status) {
-                if (status === 'apply') {
-                    const indicator = document.querySelector('.hot-reload-indicator');
-                    if (indicator) {
-                        indicator.style.background = '#00d4aa';
-                        indicator.textContent = '🔄 Reloading...';
-                        setTimeout(() => {
-                            indicator.style.background = '#00d4aa';
-                            indicator.textContent = '🔥 Hot Reload Active';
-                        }, 1000);
-                    }
-                }
-            });
-        }
-        
         // Development console helpers
         window.getPluginInfo = function() {
             if (window.pluginInstance) {

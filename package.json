@@ -60,7 +60,11 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@tailwindcss/postcss": "^4.1.11",
+    "@types/eventsource": "^1.1.15",
+    "axios": "^1.11.0",
+    "eventsource": "^4.0.0",
     "lucide-react": "^0.525.0",
     "node-fetch": "^3.3.2",
     "react": "^18.2.0",

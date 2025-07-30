@@ -1,20 +1,16 @@
 import React, { ChangeEvent, KeyboardEvent } from 'react';
-import { 
-  Plus, 
-  Upload, 
-  Trash2, 
-  MessageSquare, 
-  FileText, 
+import {
+  Plus,
+  Upload,
   Loader2,
-  AlertCircle,
-  CheckCircle,
-  Clock
+  X
 } from 'lucide-react';
 
 import { API_BASE } from '../../config';
-import { DocumentsViewProps, DocumentStatus, Document } from '../../custom-types';
+import { DocumentsViewProps, Document, ChatSession, ChatMessage } from '../../custom-types';
 import { Utils } from '../../utils';
 import { ChatSessions } from './ChatSessions';
+import { ChatView } from '../chat-view/ChatView';
 import { DocumentList } from './DocumentList';
 
 interface DocumentWithPlaceholder extends Document {
@@ -26,6 +22,22 @@ interface DocumentsViewState {
   showSessionForm: boolean;
   newSessionName: string;
   documents: DocumentWithPlaceholder[];
+  showModal: boolean;
+  selectedSession: ChatSession | null;
+  chatMessages: ChatMessage[];
+  error: string | null;
+}
+
+interface DocumentWithPlaceholder extends Document {
+  isPlaceholder?: boolean;
+}
+
+interface DocumentsViewState {
+  uploading: boolean;
+  showSessionForm: boolean;
+  newSessionName: string;
+  documents: DocumentWithPlaceholder[];
+  showModal: boolean;
 }
 
 // const initialState: Document[] = [
@@ -174,6 +186,10 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       showSessionForm: false,
       newSessionName: '',
       documents: [...(props.documents || [])],
+      showModal: false,
+      selectedSession: null,
+      chatMessages: [],
+      error: null,
     };
     this.fileInputRef = React.createRef();
 
@@ -183,24 +199,50 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     this.handleCreateSession = this.handleCreateSession.bind(this);
   }
 
+  componentDidMount() {
+    // select latest session by default
+    const { chatSessions } = this.props;
+    if (chatSessions.length) {
+      const latest = chatSessions[0];
+      this.setState({ selectedSession: latest }, () => this.loadChatMessages(latest.id));
+    }
+  }
+
   componentDidUpdate(prevProps: DocumentsViewProps) {
-    // Update local documents when props change (but preserve placeholders)
+    // update documents
     if (prevProps.documents !== this.props.documents) {
-      this.setState((prevState) => ({
+      this.setState(prev => ({
         documents: [
-          // ...initialState,
-          // Keep placeholders
-          ...prevState.documents.filter(doc => doc.isPlaceholder),
-          // Add real documents
+          ...prev.documents.filter(d => d.isPlaceholder),
           ...(this.props.documents || [])
         ]
       }));
+    }
+    // if sessions list changes, ensure selected remains valid
+    if (prevProps.chatSessions !== this.props.chatSessions) {
+      const { selectedSession } = this.state;
+      const { chatSessions } = this.props;
+      if (!selectedSession && chatSessions.length) {
+        this.setState({ selectedSession: chatSessions[0] }, () => this.loadChatMessages(chatSessions[0].id));
+      }
     }
   }
 
   componentWillUnmount() {
     // Clean up any active polling when component unmounts
     Utils.stopAllPolling();
+  }
+
+  async loadChatMessages(sessionId: string) {
+    try {
+      const fetchResponse = await fetch(`${API_BASE}/chat/messages?session_id=${sessionId}`);
+        if (!fetchResponse.ok) throw new Error('Failed to load messages');
+        const response = await fetchResponse.json();
+      
+      this.setState({ chatMessages: response });
+    } catch (err: any) {
+      this.setState({ error: err.message });
+    }
   }
 
   async handleFileUpload(e: ChangeEvent<HTMLInputElement>) {
@@ -380,93 +422,99 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
   //     this.deleteSession(sessionId);
   // }
 
+  toggleModal = () => {
+    this.setState((s) => ({ showModal: !s.showModal }));
+  };
+
   render() {
+    const {
+      documents,
+      uploading,
+      showSessionForm,
+      newSessionName,
+      showModal,
+      selectedSession,
+      chatMessages
+    } = this.state;
     const { chatSessions, onChatSessionSelect } = this.props;
-    const { uploading, showSessionForm, newSessionName, documents } = this.state;
 
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Documents Section */}
-        <div className="lg:col-span-2">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">Documents</h2>
-            <div className="flex space-x-3">
-              <input
-                type="file"
-                ref={this.fileInputRef}
-                onChange={this.handleFileUpload}
-                accept=".pdf,.doc,.docx"
-                className="hidden"
-              />
-              <button
-                onClick={() => this.fileInputRef.current?.click()}
-                disabled={uploading}
-                className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors flex items-center text-sm disabled:opacity-50"
-              >
-                {uploading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Upload className="h-4 w-4 mr-2" />
-                )}
-                {uploading ? 'Uploading...' : 'Upload Document'}
-              </button>
-            </div>
-          </div>
+      <div className="space-y-6">
+        {/* Chat view at top */}
+        {selectedSession && (
+          <ChatView
+            session={selectedSession}
+            messages={chatMessages}
+            onMessageSent={() => this.loadChatMessages(selectedSession.id)}
+            setError={msg => this.setState({ error: msg })}
+          />
+        )}
 
-          {/* Documents list here */}
-          <DocumentList documents={documents} onDocumentDelete={this.handleDocumentDelete} />
+        {/* Project files button and sessions list */}
+        <div className="space-y-4">
+          <button
+            onClick={this.toggleModal}
+            className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg shadow-sm flex items-center space-x-2"
+          >
+            <span className="font-medium">Project files</span>
+            <span className="bg-blue-500 text-white rounded-full px-2 text-sm">
+              {documents.length}
+            </span>
+          </button>
+
+          <ChatSessions
+            chatSessions={chatSessions}
+            onChatSessionSelect={session => {
+              this.setState({ selectedSession: session });
+              this.loadChatMessages(session.id);
+              onChatSessionSelect(session);
+            }}
+          />
         </div>
 
-        {/* Chat Sessions Section */}
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">Chat Sessions</h2>
-            <button
-              onClick={() => this.setState({ showSessionForm: true })}
-              className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center text-sm"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Session
-            </button>
-          </div>
+        {/* Documents modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 relative z-50">
+              <div className="flex justify-between items-center border-b px-6 py-4">
+                <h3 className="text-lg font-semibold">Project Files</h3>
+                <button onClick={this.toggleModal} className="text-gray-500 hover:text-gray-700">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
-          {/* Create Session Form */}
-          {showSessionForm && (
-            <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  value={newSessionName}
-                  onChange={(e) => this.setState({ newSessionName: e.target.value })}
-                  placeholder="Session name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === 'Enter') {
-                      this.handleCreateSession();
-                    }
-                  }}
-                />
-                <div className="flex space-x-2">
-                  <button
-                    onClick={this.handleCreateSession}
-                    disabled={!newSessionName.trim()}
-                    className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
-                  >
-                    Create
-                  </button>
-                  <button
-                    onClick={() => this.setState({ showSessionForm: false })}
-                    className="bg-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-400 transition-colors text-sm"
-                  >
-                    Cancel
-                  </button>
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-md font-medium">Documents</h4>
+                  <div>
+                    <input
+                      type="file"
+                      ref={this.fileInputRef}
+                      onChange={e => this.handleFileUpload(e)}
+                      accept=".pdf,.doc,.docx"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => this.fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center text-sm disabled:opacity-50"
+                    >
+                      {uploading
+                        ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        : <Upload className="h-4 w-4 mr-2" />
+                      }
+                      {uploading ? 'Uploading…' : 'Upload Document'}
+                    </button>
+                  </div>
                 </div>
+                <DocumentList
+                  documents={documents}
+                  onDocumentDelete={(id, name) => this.handleDocumentDelete(id, name)}
+                />
               </div>
             </div>
-          )}
-
-          <ChatSessions chatSessions={chatSessions} onChatSessionSelect={onChatSessionSelect} />
-        </div>
+          </div>
+        )}
       </div>
     );
   }

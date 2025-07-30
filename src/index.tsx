@@ -1,8 +1,12 @@
 import React from 'react';
 import PluginTemplate from './PluginTemplate';
+import ChatWrapperPlugin from './PluginHookWrapper';
 
 // Export the main component
-export default PluginTemplate;
+export {
+  PluginTemplate,
+  ChatWrapperPlugin,
+};
 
 // Version information - TODO: Update version as you develop
 export const version = '1.0.0';

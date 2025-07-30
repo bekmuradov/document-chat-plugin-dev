@@ -5,9 +5,9 @@
 export interface ApiService {
   get: (url: string, options?: any) => Promise<ApiResponse>;
   post: (url: string, data: any, options?: any) => Promise<ApiResponse>;
-  // put: (url: string, data: any, options?: any) => Promise<ApiResponse>;
-  // delete: (url: string, options?: any) => Promise<ApiResponse>;
-  // postStreaming?: (url: string, data: any, onChunk: (chunk: string) => void, options?: any) => Promise<ApiResponse>;
+  put: (url: string, data: any, options?: any) => Promise<ApiResponse>;
+  delete: (url: string, options?: any) => Promise<ApiResponse>;
+  postStreaming?: (url: string, data: any, onChunk: (chunk: string) => void, options?: any) => Promise<ApiResponse>;
 }
 
 export interface EventService {
@@ -50,7 +50,7 @@ export interface Services {
   event?: EventService;
   theme?: ThemeService;
   settings?: SettingsService;
-  pageContext?: PageContextService;
+  pageContext: PageContextService;
 }
 
 // API Response interface
