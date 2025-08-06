@@ -514,7 +514,7 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
         {/* Messages */}
         <ChatMessagesList messages={displayMessages} sending={sending} />
 
-        <div ref={this.messagesEndRef} />
+        {/* <div ref={this.messagesEndRef} /> */}
 
         {/* Message Input */}
         <ChatInput
