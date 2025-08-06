@@ -121,6 +121,7 @@ export type CollectionFormChangeHandler = (field: keyof CreateCollectionForm, va
 export type CollectionFormCancelHandler = () => void;
 
 export interface DocumentsViewProps {
+  apiService?: ApiService;
   collection: Collection;
   documents: Document[];
   chatSessions: ChatSession[];

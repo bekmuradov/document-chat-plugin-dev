@@ -601,6 +601,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
               collection={selectedCollection}
               documents={documents}
               chatSessions={chatSessions}
+              apiService={this.props.services.api}
               onDocumentUpload={() => this.loadDocuments(selectedCollection.id)}
               onDocumentDelete={() => this.loadDocuments(selectedCollection.id)}
               onChatSessionCreate={this.loadChatSessions}

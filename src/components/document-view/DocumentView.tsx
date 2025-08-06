@@ -435,13 +435,14 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       selectedSession,
       chatMessages
     } = this.state;
-    const { chatSessions, onChatSessionSelect } = this.props;
+    const { chatSessions, onChatSessionSelect, apiService } = this.props;
 
     return (
       <div className="space-y-6">
         {/* Chat view at top */}
         {selectedSession && (
           <ChatView
+            apiService={apiService}
             session={selectedSession}
             messages={chatMessages}
             onMessageSent={() => this.loadChatMessages(selectedSession.id)}
