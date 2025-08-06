@@ -320,7 +320,8 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
       let finalRetrievedChunks: any[] = [];
 
       if (!apiService || !apiService.postStreaming) {
-        console.log("No API Service: ", apiService);
+        // falback in case api service is undefined
+        await this.handleSendStreamingMessage();
         return;
       }
 

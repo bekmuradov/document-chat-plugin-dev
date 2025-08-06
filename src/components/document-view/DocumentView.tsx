@@ -438,83 +438,88 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     const { chatSessions, onChatSessionSelect, apiService } = this.props;
 
     return (
-      <div className="space-y-6">
-        {/* Chat view at top */}
-        {selectedSession && (
-          <ChatView
-            apiService={apiService}
-            session={selectedSession}
-            messages={chatMessages}
-            onMessageSent={() => this.loadChatMessages(selectedSession.id)}
-            setError={msg => this.setState({ error: msg })}
-          />
-        )}
+      <div className="h-[800px] overflow-y-auto">
+        <div className="space-y-6 p-4">
+          {/* Chat view at top */}
+          {selectedSession && (
+            <ChatView
+              apiService={apiService}
+              session={selectedSession}
+              messages={chatMessages}
+              onMessageSent={() => this.loadChatMessages(selectedSession.id)}
+              setError={msg => this.setState({ error: msg })}
+            />
+          )}
 
-        {/* Project files button and sessions list */}
-        <div className="space-y-4">
-          <button
-            onClick={this.toggleModal}
-            className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg shadow-sm flex items-center space-x-2"
-          >
-            <span className="font-medium">Project files</span>
-            <span className="bg-blue-500 text-white rounded-full px-2 text-sm">
-              {documents.length}
-            </span>
-          </button>
+          {/* Project files button and sessions list */}
+          <div className="space-y-4">
+            <button
+              onClick={this.toggleModal}
+              className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg shadow-sm flex items-center space-x-2"
+            >
+              <span className="font-medium">Project files</span>
+              <span className="bg-blue-500 text-white rounded-full px-2 text-sm">
+                {documents.length}
+              </span>
+            </button>
 
-          <ChatSessions
-            chatSessions={chatSessions}
-            onChatSessionSelect={session => {
-              this.setState({ selectedSession: session });
-              this.loadChatMessages(session.id);
-              onChatSessionSelect(session);
-            }}
-          />
-        </div>
-
-        {/* Documents modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
-            <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 relative z-50">
-              <div className="flex justify-between items-center border-b px-6 py-4">
-                <h3 className="text-lg font-semibold">Project Files</h3>
-                <button onClick={this.toggleModal} className="text-gray-500 hover:text-gray-700">
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="text-md font-medium">Documents</h4>
-                  <div>
-                    <input
-                      type="file"
-                      ref={this.fileInputRef}
-                      onChange={e => this.handleFileUpload(e)}
-                      accept=".pdf,.doc,.docx"
-                      className="hidden"
-                    />
-                    <button
-                      onClick={() => this.fileInputRef.current?.click()}
-                      disabled={uploading}
-                      className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center text-sm disabled:opacity-50"
-                    >
-                      {uploading
-                        ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        : <Upload className="h-4 w-4 mr-2" />
-                      }
-                      {uploading ? 'Uploading…' : 'Upload Document'}
-                    </button>
-                  </div>
-                </div>
-                <DocumentList
-                  documents={documents}
-                  onDocumentDelete={(id, name) => this.handleDocumentDelete(id, name)}
-                />
-              </div>
+            {/* Scrollable Chat Sessions */}
+            <div className="max-h-96 overflow-y-auto">
+              <ChatSessions
+                chatSessions={chatSessions}
+                onChatSessionSelect={session => {
+                  this.setState({ selectedSession: session });
+                  this.loadChatMessages(session.id);
+                  onChatSessionSelect(session);
+                }}
+              />
             </div>
           </div>
-        )}
+
+          {/* Documents modal */}
+          {showModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
+              <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 relative z-50">
+                <div className="flex justify-between items-center border-b px-6 py-4">
+                  <h3 className="text-lg font-semibold">Project Files</h3>
+                  <button onClick={this.toggleModal} className="text-gray-500 hover:text-gray-700">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-md font-medium">Documents</h4>
+                    <div>
+                      <input
+                        type="file"
+                        ref={this.fileInputRef}
+                        onChange={e => this.handleFileUpload(e)}
+                        accept=".pdf,.doc,.docx"
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => this.fileInputRef.current?.click()}
+                        disabled={uploading}
+                        className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center text-sm disabled:opacity-50"
+                      >
+                        {uploading
+                          ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          : <Upload className="h-4 w-4 mr-2" />
+                        }
+                        {uploading ? 'Uploading…' : 'Upload Document'}
+                      </button>
+                    </div>
+                  </div>
+                  <DocumentList
+                    documents={documents}
+                    onDocumentDelete={(id, name) => this.handleDocumentDelete(id, name)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
