@@ -1,6 +1,5 @@
-import React, { ChangeEvent, KeyboardEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 import {
-  Plus,
   Upload,
   Loader2,
   X

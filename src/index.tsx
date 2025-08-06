@@ -1,6 +1,5 @@
 import React from 'react';
 import PluginTemplate from './PluginTemplate';
-import ChatWrapperPlugin from './PluginHookWrapper';
 
 // Export the main component
 export default PluginTemplate;
