@@ -10,7 +10,7 @@ export const version = '1.0.0';
 // TEMPLATE: Plugin metadata for development/debugging
 export const metadata = {
   name: 'ChatWithYourDocuments',
-  description: 'A chat with your documents BrainDrive Plugin',
+  description: 'A chat with your documents BrainDrive Plugin, requires to run chat with your documents',
   version: '1.0.0',
   author: 'BrainDrive',
   // TODO: Add any additional metadata your plugin needs
