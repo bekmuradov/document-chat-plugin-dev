@@ -196,6 +196,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     this.handleFileUpload = this.handleFileUpload.bind(this);
     this.handleDocumentDelete = this.handleDocumentDelete.bind(this);
     this.handleCreateSession = this.handleCreateSession.bind(this);
+    this.handleSelectedChatSession = this.handleSelectedChatSession.bind(this);
   }
 
   componentDidMount() {
@@ -203,7 +204,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     const { chatSessions } = this.props;
     if (chatSessions.length) {
       const latest = chatSessions[0];
-      this.setState({ selectedSession: latest }, () => this.loadChatMessages(latest.id));
+      this.handleSelectedChatSession(latest);
     }
   }
 
@@ -230,6 +231,12 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
   componentWillUnmount() {
     // Clean up any active polling when component unmounts
     Utils.stopAllPolling();
+  }
+
+  handleSelectedChatSession(session: ChatSession) {
+    if (session) {
+      this.setState({ selectedSession: session }, () => this.loadChatMessages(session.id));
+    }
   }
 
   async loadChatMessages(sessionId: string) {
@@ -438,8 +445,8 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     const { chatSessions, onChatSessionSelect, apiService } = this.props;
 
     return (
-      <div className="h-[800px] overflow-y-auto">
-        <div className="space-y-6 p-4">
+      <div className="h-[700px] overflow-y-auto">
+        <div className="space-y-6 mb-8">
           {/* Chat view at top */}
           {selectedSession && (
             <ChatView
@@ -467,11 +474,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
             <div className="max-h-96 overflow-y-auto">
               <ChatSessions
                 chatSessions={chatSessions}
-                onChatSessionSelect={session => {
-                  this.setState({ selectedSession: session });
-                  this.loadChatMessages(session.id);
-                  onChatSessionSelect(session);
-                }}
+                onChatSessionSelect={this.handleSelectedChatSession}
               />
             </div>
           </div>
