@@ -617,6 +617,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
               onDocumentDelete={() => this.loadDocuments(selectedCollection.id)}
               onChatSessionCreate={this.loadChatSessions}
               onChatSessionSelect={this.handleChatSessionSelect}
+              onChatSessionDelete={this.loadChatSessions}
               setError={(msg) => this.setState({ error: msg })}
             />
           )}

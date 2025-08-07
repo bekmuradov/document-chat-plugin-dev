@@ -130,6 +130,7 @@ export interface DocumentsViewProps {
   onDocumentDelete: () => void;
   onChatSessionCreate: () => void;
   onChatSessionSelect: (session: ChatSession) => void;
+  onChatSessionDelete: () => void;
   setError: (error: string | null) => void;
 }
 

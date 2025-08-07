@@ -7,19 +7,25 @@ interface ComponentProps {
     chatSessions: ChatSession[];
     onChatSessionSelect: (session: ChatSession) => void;
     maxHeight?: string;
+    onChatSessionDelete: (sessionId: string, sessionName: string) => void;
 }
 
 export const ChatSessionsList: React.FC<ComponentProps> = ({
     chatSessions,
     onChatSessionSelect,
-    maxHeight = "max-h-96"
+    onChatSessionDelete,
+    maxHeight = "max-h-96",
 }) => {
     return (
         <div className={`overflow-y-auto ${maxHeight}`}>
             <ul className="divide-y divide-gray-200">
                 {chatSessions.map((session) => (
                     <li key={session.id}>
-                        <ChatSessionsListItem chatSession={session} onChatSessionSelect={onChatSessionSelect} />
+                        <ChatSessionsListItem
+                            chatSession={session}
+                            onChatSessionSelect={onChatSessionSelect}
+                            onChatSessionDelete={onChatSessionDelete}
+                        />
                         {/* Alternative list item */}
                         <div 
                             className="p-3 hover:bg-gray-50 cursor-pointer hidden"

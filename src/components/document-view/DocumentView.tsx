@@ -198,6 +198,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     this.handleDocumentDelete = this.handleDocumentDelete.bind(this);
     this.handleCreateSession = this.handleCreateSession.bind(this);
     this.handleSelectedChatSession = this.handleSelectedChatSession.bind(this);
+    this.handleDeleteSession = this.handleDeleteSession.bind(this);
   }
 
   componentDidMount() {
@@ -434,10 +435,66 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
   }
 
   // TODO: Implement chat session delete with propagation
-  // handleDeleteSession(event, sessionId) {
-  //     event.stopPropagation();
-  //     this.deleteSession(sessionId);
-  // }
+  async handleDeleteSession(sessionId: string, sessionName: string) {
+    if (!confirm(`Are you sure you want to delete the chat session "${sessionName}"? This action will permanently delete all messages in this session.`)) {
+      return;
+    }
+
+    Utils.showLoading(`Deleting "${sessionName}"...`);
+
+    try {
+      const response = await fetch(`${API_BASE}/chat/sessions/${sessionId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete document: ${response.statusText}`);
+      }
+
+      Utils.showToast(`Successfully deleted "${sessionName}"`, 'success');
+
+      // --- NEW LOGIC FOR SELECTING THE NEXT SESSION ---
+      const { selectedSession, chatMessages } = this.state;
+      const { onChatSessionDelete, chatSessions } = this.props;
+
+      // Check if the deleted session was the currently selected one
+      if (selectedSession && selectedSession.id === sessionId) {
+        // Find the index of the deleted session in the prop's list
+        const deletedIndex = chatSessions.findIndex(s => s.id === sessionId);
+
+        let nextSession = null;
+        // Check if there is a session after the deleted one
+        if (chatSessions[deletedIndex + 1]) {
+            nextSession = chatSessions[deletedIndex + 1];
+        } 
+        // If not, check if there is a session before the deleted one
+        else if (chatSessions[deletedIndex - 1]) {
+            nextSession = chatSessions[deletedIndex - 1];
+        } 
+        // If it was the only session, set selectedSession to null
+        else {
+            nextSession = null;
+        }
+
+        // Update the state with the new selected session or null
+        this.setState({selectedSession: nextSession}, () => {
+          if (this.state.selectedSession) {
+            this.loadChatMessages(this.state.selectedSession.id)
+          } else {
+            this.setState({ chatMessages: [] })
+          }
+        });
+      }
+
+      onChatSessionDelete();
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to delete document';
+      Utils.showToast(errorMessage, 'error');
+      this.props.setError(errorMessage);
+    } finally {
+      Utils.hideLoading();
+    }
+  }
 
   toggleModal = () => {
     this.setState((s) => ({ showModal: !s.showModal }));
@@ -488,6 +545,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
               <ChatSessions
                 chatSessions={chatSessions}
                 onChatSessionSelect={this.handleSelectedChatSession}
+                onChatSessionDelete={this.handleDeleteSession}
               />
             </div>
           </div>

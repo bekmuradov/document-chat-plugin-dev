@@ -10,9 +10,10 @@ import { ChatSession } from '../../custom-types';
 interface ComponentProps {
     chatSession: ChatSession;
     onChatSessionSelect: (session: ChatSession) => void;
+    onChatSessionDelete: (sessionId: string, sessionName: string) => void;
 }
 
-export const ChatSessionsListItem: React.FC<ComponentProps> = ({chatSession, onChatSessionSelect}) => {
+export const ChatSessionsListItem: React.FC<ComponentProps> = ({chatSession, onChatSessionSelect, onChatSessionDelete}) => {
 
     const getMessageCountElement = () => {
         if ((chatSession.message_count || 0) > 0) {
@@ -41,7 +42,10 @@ export const ChatSessionsListItem: React.FC<ComponentProps> = ({chatSession, onC
                     {/* <MessageCircle className="h-4 w-4" /> */}
                     {getMessageCountElement()}
                     <button
-                        // onClick={() => onDocumentDelete(document.id, document.original_filename)}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onChatSessionDelete(chatSession.id, chatSession.name)
+                        }}
                         className="delete-session-btn mt-1 p-1 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                         title={`Delete ${chatSession.name}`}
                     >
