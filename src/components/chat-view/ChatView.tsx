@@ -459,7 +459,7 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
         <ChatInput
           newMessage={newMessage}
           onChange={(newInput) => this.setState({ newMessage: newInput })}
-          onMessageSend={this.handleSendStreamingRequest}
+          onMessageSend={this.handleSendStreamingMessage}
           sending={sending}
         />
       </div>
