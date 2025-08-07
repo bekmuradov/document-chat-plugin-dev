@@ -123,6 +123,7 @@ export type CollectionFormCancelHandler = () => void;
 export interface DocumentsViewProps {
   apiService?: ApiService;
   collection: Collection;
+  selectedSession?: ChatSession | null;
   documents: Document[];
   chatSessions: ChatSession[];
   onDocumentUpload: () => void;

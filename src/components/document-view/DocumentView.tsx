@@ -2,7 +2,8 @@ import React, { ChangeEvent } from 'react';
 import {
   Upload,
   Loader2,
-  X
+  X,
+  Plus,
 } from 'lucide-react';
 
 import { API_BASE } from '../../config';
@@ -186,7 +187,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       newSessionName: '',
       documents: [...(props.documents || [])],
       showModal: false,
-      selectedSession: null,
+      selectedSession: props.selectedSession || null,
       chatMessages: [],
       error: null,
     };
@@ -208,7 +209,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     }
   }
 
-  componentDidUpdate(prevProps: DocumentsViewProps) {
+  componentDidUpdate(prevProps: DocumentsViewProps, prevState: DocumentsViewState) {
     // update documents
     if (prevProps.documents !== this.props.documents) {
       this.setState(prev => ({
@@ -223,7 +224,17 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       const { selectedSession } = this.state;
       const { chatSessions } = this.props;
       if (!selectedSession && chatSessions.length) {
-        this.setState({ selectedSession: chatSessions[0] }, () => this.loadChatMessages(chatSessions[0].id));
+        this.handleSelectedChatSession(chatSessions[0])
+      }
+    }
+
+    if (prevProps.selectedSession !== this.props.selectedSession) {
+      console.log("New session: ", {
+        prev_session: prevProps.selectedSession?.name,
+        new_session: this.props.selectedSession?.name
+      })
+      if (this.props.selectedSession) {
+        this.handleSelectedChatSession(this.props.selectedSession)
       }
     }
   }
@@ -442,7 +453,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       selectedSession,
       chatMessages
     } = this.state;
-    const { chatSessions, onChatSessionSelect, apiService } = this.props;
+    const { chatSessions, apiService } = this.props;
 
     return (
       <div className="h-[700px] overflow-y-auto">
@@ -460,15 +471,17 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
 
           {/* Project files button and sessions list */}
           <div className="space-y-4">
-            <button
-              onClick={this.toggleModal}
-              className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg shadow-sm flex items-center space-x-2"
-            >
-              <span className="font-medium">Project files</span>
-              <span className="bg-blue-500 text-white rounded-full px-2 text-sm">
-                {documents.length}
-              </span>
-            </button>
+            <div className="flex space-x-2 items-center mb-6">
+              <button
+                onClick={this.toggleModal}
+                className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg shadow-sm flex items-center space-x-2"
+              >
+                <span className="font-medium">Project files</span>
+                <span className="bg-blue-500 text-white rounded-full px-2 text-sm">
+                  {documents.length}
+                </span>
+              </button>
+            </div>
 
             {/* Scrollable Chat Sessions */}
             <div className="max-h-96 overflow-y-auto">

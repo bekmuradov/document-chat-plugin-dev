@@ -7,7 +7,7 @@ import {
   ArrowLeft,
   AlertCircle,
 } from 'lucide-react';
-import { ChatView, CollectionsView, DocumentsView } from './components';
+import { ChatView, CollectionsView, DocumentsView, CreateSessionForm } from './components';
 import { API_BASE } from './config';
 import { Collection, ChatSession, ViewType, Document, ChatMessage } from './custom-types';
 import type { TemplateTheme } from './types';
@@ -438,11 +438,14 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
     // }
   }
 
-  handleChatSessionSelect(session: ChatSession) {
-    this.setState({
-      selectedChatSession: session,
-      currentView: ViewType.CHAT,
-    });
+  async handleChatSessionSelect(session: ChatSession) {
+    if (session) {
+      this.setState({
+        selectedChatSession: session,
+        // currentView: ViewType.CHAT
+      });
+      this.loadChatMessages(session.id);
+    }
 
     // Emit event for other plugins
     // if (this.props.services.event && this.props.services.event.emit) {
@@ -541,10 +544,10 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
                 </h1>
               </div>
               {selectedCollection && (
-                <div className="flex space-x-2 hidden">
+                <div className="flex space-x-2">
                   <button
                     onClick={() => this.handleViewChange(ViewType.DOCUMENTS)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors hidden ${
                       currentView === ViewType.DOCUMENTS
                         ? 'bg-blue-100 text-blue-700'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -555,7 +558,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
                   </button>
                   <button
                     onClick={() => this.handleViewChange(ViewType.CHAT)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors hidden ${
                       currentView === ViewType.CHAT
                         ? 'bg-blue-100 text-blue-700'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -564,6 +567,13 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
                     <MessageSquare className="h-4 w-4 inline mr-2" />
                     Chat
                   </button>
+                  <CreateSessionForm
+                    collectionId={selectedCollection.id}
+                    onSessionCreated={this.handleChatSessionSelect}
+                    onError={(error) => console.error(error)}
+                    buttonText="New Chat"
+                    placeholder="Session name"
+                  />
                 </div>
               )}
             </div>
@@ -599,6 +609,7 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
           {currentView === ViewType.DOCUMENTS && selectedCollection && (
             <DocumentsView
               collection={selectedCollection}
+              selectedSession={selectedChatSession}
               documents={documents}
               chatSessions={chatSessions}
               apiService={this.props.services.api}
