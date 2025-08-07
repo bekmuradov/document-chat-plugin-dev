@@ -31,12 +31,17 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
       optimisticMessages: [],
     };
     this.messagesEndRef = React.createRef();
-
+    
+    this.stopStreaming = this.stopStreaming.bind(this);
+    this.scrollToBottom = this.scrollToBottom.bind(this);
+    this.createOptimisticMessage = this.createOptimisticMessage.bind(this);
     this.handleSendMessage = this.handleSendMessage.bind(this);
     this.handleSendStreamingMessage = this.handleSendStreamingMessage.bind(this);
     this.handleSendStreamingRequest = this.handleSendStreamingRequest.bind(this);
-    this.scrollToBottom = this.scrollToBottom.bind(this);
-    this.stopStreaming = this.stopStreaming.bind(this);
+    this.updateStreamingMessage = this.updateStreamingMessage.bind(this);
+    this.handleStreamComplete = this.handleStreamComplete.bind(this);
+    this.handleStreamError = this.handleStreamError.bind(this);
+    this.syncWithServer = this.syncWithServer.bind(this);
   }
 
   componentWillUnmount() {
@@ -129,34 +134,15 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
     const messageToSend = newMessage;
     this.setState({ newMessage: '' });
 
-    // Create the user's message immediately and add it to userMessageQueued
-    const newUserMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      session_id: session.id,
-      created_at: new Date().toISOString(),
-      user_message: messageToSend,
-      assistant_response: '', // Not applicable for user message
-      retrieved_chunks: [],
-    };
-    this.setState({ userMessageQueued: newUserMessage });
+    // Create initial streaming assistant message
+    const initialAssistantMessage = this.createOptimisticMessage(messageToSend, MessageRole.USER, true);
+    this.currentStreamingMessageId = initialAssistantMessage.id;
 
-    console.log('User message quedued for display: ', newUserMessage);
-
-    console.log('Initializing streamingAssistantMessage:', this.state.streamingAssistantMessage);
+    this.setState(prev => ({
+      optimisticMessages: [...prev.optimisticMessages, initialAssistantMessage]
+    }));
 
     try {
-      const streamingId = `temp-assistant-${Date.now()}`;
-      this.setState({
-        streamingAssistantMessage: {
-          id: streamingId,
-          session_id: session.id,
-          created_at: new Date().toISOString(),
-          user_message: '',
-          assistant_response: '',
-          retrieved_chunks: [],
-        }
-      });
-
       this.abortController = new AbortController();
       let fullAssistantResponse = '';
       let finalRetrievedChunks: any[] = [];
@@ -184,31 +170,14 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
         },
         onmessage: (event) => {
           try {
-            console.log('>>> SSE EVENT RECEIVED <<<');
-            console.log('Raw event data:', event.data); // Should show "data: {json_payload}"
-
             const data = JSON.parse(event.data);
-            console.log('Parsed data object:', data); // Should show the JSON object e.g., {response: "...", retrieved_chunks: [...]}
-
+          
             if (data.error) {
-              console.error('Backend signaled an error in stream:', data.error);
               throw new Error(data.error);
             }
 
-            if (data.complete) {
-              console.log('Stream "complete" signal received from backend.');
-              this.stopStreaming();
-              const timeoutId = setTimeout(() => {
-                this.setState({
-                  sending: false,
-                  userMessageQueued: null,
-                  streamingAssistantMessage: null,
-                }, () => { // Use callback to ensure state is updated before calling parent
-                    console.log('State cleared after stream complete.');
-                    onMessageSent(); // This will re-fetch all messages
-                });
-                clearTimeout(timeoutId);
-              }, 5000);
+            if (data.complete && data.message_id && data.created_at) {
+              this.handleStreamComplete(data.message_id, data.created_at);
               return;
             }
 
@@ -216,52 +185,25 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
             if (data.response) {
               fullAssistantResponse += data.response;
             }
-            // Update retrieved chunks if provided (usually on the first chunk)
+
+            // Update retrieved chunks if provided
             if (data.retrieved_chunks && Array.isArray(data.retrieved_chunks)) {
-              finalRetrievedChunks = data.retrieved_chunks; // Assign directly if new array
+              finalRetrievedChunks = data.retrieved_chunks;
             }
 
-            console.log("ACCUMULATED Assistant Response: ", fullAssistantResponse);
-            console.log("ACCUMULATED Retrieved Chunks:", finalRetrievedChunks);
-
-            this.setState((prevState) => {
-              if (!prevState.streamingAssistantMessage) {
-                  console.warn('streamingAssistantMessage is null in setState update. This should not happen if initialized correctly.');
-                  return prevState;
-              }
-              const updatedMessage = {
-                  ...prevState.streamingAssistantMessage!,
-                  assistant_response: fullAssistantResponse,
-                  retrieved_chunks: finalRetrievedChunks,
-              };
-              console.log('Updating streamingAssistantMessage in state to:', updatedMessage);
-              return {
-                  ...prevState,
-                  streamingAssistantMessage: updatedMessage,
-              };
-            });
+            // Update the streaming message in optimistic messages
+            this.updateStreamingMessage(fullAssistantResponse, finalRetrievedChunks);
 
           } catch (parseError) {
             console.error('Error parsing SSE event data or during onmessage processing:', parseError, 'Event data was:', event.data);
-            this.stopStreaming(); // Stop streaming on parsing error
-            this.setState({
-              sending: false,
-              userMessageQueued: null,
-              streamingAssistantMessage: null, // Clear incomplete streaming message
-              newMessage: messageToSend, // Restore user's input
-            });
+            console.error('Error parsing SSE event data:', parseError);
+            this.handleStreamError(messageToSend, 'Error processing streaming response data.');
             setError('Error processing streaming response data.');
           }
         },
         onerror: (error) => {
           console.error('fetchEventSource error:', error);
-          this.stopStreaming(); // Ensure controller is aborted
-          this.setState({
-            sending: false,
-            userMessageQueued: null,
-            streamingAssistantMessage: null, // Clear streaming message on any error
-            newMessage: messageToSend, // Restore message input if streaming fails
-          });
+          this.handleStreamError(messageToSend, 'Error processing streaming response data.');
           if (error.name === 'AbortError') {
             console.log('Streaming was aborted by user or component unmount.');
           } else {
@@ -278,13 +220,7 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
 
     } catch (err: any) {
       console.error('Stream setup error:', err);
-      this.stopStreaming();
-      this.setState({
-        sending: false,
-        userMessageQueued: null, // Clear on error
-        streamingAssistantMessage: null,
-        newMessage: messageToSend,
-      });
+      this.handleStreamError(messageToSend, err.message || 'Failed to start streaming');
       if (err.name === 'AbortError') {
         console.log('Stream was aborted');
       } else {
@@ -297,6 +233,13 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
     const { newMessage } = this.state;
     const { session, setError, apiService } = this.props;
     
+    if (!apiService || !apiService.postStreaming) {
+      // falback in case api service is undefined
+      console.log("falling back to in app streaming request")
+      await this.handleSendStreamingMessage();
+      return;
+    }
+
     if (!newMessage.trim()) {
       return;
     };
@@ -318,12 +261,6 @@ export class ChatView extends React.Component<ChatViewProps, ChatViewState> {
       this.abortController = new AbortController();
       let fullAssistantResponse = '';
       let finalRetrievedChunks: any[] = [];
-
-      if (!apiService || !apiService.postStreaming) {
-        // falback in case api service is undefined
-        await this.handleSendStreamingMessage();
-        return;
-      }
 
       const onChunk = (chunk: string) => {
         try {
