@@ -101,6 +101,16 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         self.plugin_data = {
             "name": "ChatWithYourDocuments",
             "description": "Chat With Your Documents BrainDrive plugin",
+            "required_services_runtime": [
+                {
+                    "name": "my-plugin-backend",
+                    "source_url": "https://github.com/BrainDriveAI/chat-with-your-documents",
+                    "type": "python",
+                    "install_command": "pip install -r requirements.txt",
+                    "start_command": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+                    "healthcheck_url": "http://localhost:8000/health"
+                }
+            ],
             "version": "1.0.1",
             "type": "frontend",
             "icon": "Puzzle",  # TODO: Choose an appropriate icon
