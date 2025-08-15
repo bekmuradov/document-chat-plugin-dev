@@ -130,8 +130,8 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                 "name": "cwyd-backend",
                 "source_url": "https://github.com/BrainDriveAI/chat-with-your-documents",
                 "type": "python",
-                "install_command": "pip install -r requirements.txt",
-                "start_command": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+                "install_command": "-m pip install -r requirements.txt",
+                "start_command": "-m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
                 "healthcheck_url": "http://localhost:8000/health"
             }
         ]
