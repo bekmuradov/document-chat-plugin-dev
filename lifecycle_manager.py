@@ -101,16 +101,6 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         self.plugin_data = {
             "name": "ChatWithYourDocuments",
             "description": "Chat With Your Documents BrainDrive plugin",
-            "required_services_runtime": [
-                {
-                    "name": "my-plugin-backend",
-                    "source_url": "https://github.com/BrainDriveAI/chat-with-your-documents",
-                    "type": "python",
-                    "install_command": "pip install -r requirements.txt",
-                    "start_command": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
-                    "healthcheck_url": "http://localhost:8000/health"
-                }
-            ],
             "version": "1.0.1",
             "type": "frontend",
             "icon": "Puzzle",  # TODO: Choose an appropriate icon
@@ -134,6 +124,17 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             "installation_type": "remote",
             "permissions": ["storage.read", "storage.write", "api.access"]  # TODO: Customize permissions
         }
+
+        self.required_services_runtime = [
+            {
+                "name": "cwyd-backend",
+                "source_url": "https://github.com/BrainDriveAI/chat-with-your-documents",
+                "type": "python",
+                "install_command": "pip install -r requirements.txt",
+                "start_command": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+                "healthcheck_url": "http://localhost:8000/health"
+            }
+        ]
         
         # TEMPLATE: Define module data - TODO: Customize for your plugin's modules
         self.module_data = [
@@ -225,6 +226,11 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
     def PLUGIN_DATA(self):
         """Compatibility property for remote installer validation"""
         return self.plugin_data
+
+
+    @property
+    def SERVICCE_RUNTIME(self):
+        return self.required_services_runtime
     
     async def get_plugin_metadata(self) -> Dict[str, Any]:
         """Return plugin metadata and configuration"""
