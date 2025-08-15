@@ -127,12 +127,26 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
 
         self.required_services_runtime = [
             {
-                "name": "cwyd-backend",
+                "name": "cwyd_service",
                 "source_url": "https://github.com/BrainDriveAI/chat-with-your-documents",
-                "type": "python",
-                "install_command": "-m pip install -r requirements.txt",
-                "start_command": "-m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
-                "healthcheck_url": "http://localhost:8000/health"
+                "type": "docker-compose",
+                "install_command": "",
+                "start_command": "docker compose up --build -d",
+                "healthcheck_url": "http://localhost:8000/health",
+                "required_env_vars": [
+                    "LLM_PROVIDER",
+                    "EMBEDDING_PROVIDER",
+                    "ENABLE_CONTEXTUAL_RETRIEVAL",
+                    "OLLAMA_CONTEXTUAL_LLM_BASE_URL",
+                    "OLLAMA_CONTEXTUAL_LLM_MODEL",
+                    "OLLAMA_LLM_BASE_URL",
+                    "OLLAMA_LLM_MODEL",
+                    "OLLAMA_EMBEDDING_BASE_URL",
+                    "OLLAMA_EMBEDDING_MODEL",
+                    "DOCUMENT_PROCESSOR_API_URL",
+                    "DOCUMENT_PROCESSOR_TIMEOUT",
+                    "DOCUMENT_PROCESSOR_MAX_RETRIES",
+                ]
             }
         ]
         
