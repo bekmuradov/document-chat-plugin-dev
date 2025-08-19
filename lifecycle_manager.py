@@ -560,6 +560,49 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             logger.error(f"ChatWithYourDocuments: Error checking existing plugin: {e}")
             return {'exists': False, 'error': str(e)}
     
+    async def _check_and_create_service_runtime_table(self, db: AsyncSession) -> bool:
+        """Check if plugin_service_runtime table exists and create it if not"""
+        try:
+            # Try to check if the table exists
+            check_table_query = text("""
+            SELECT name FROM sqlite_master 
+            WHERE type='table' AND name='plugin_service_runtime'
+            """)
+            result = await db.execute(check_table_query)
+            table_exists = result.fetchone() is not None
+            
+            if not table_exists:
+                logger.info("plugin_service_runtime table does not exist, creating it...")
+                create_table_query = text("""
+                CREATE TABLE plugin_service_runtime (
+                    id VARCHAR PRIMARY KEY,
+                    plugin_id VARCHAR NOT NULL,
+                    name VARCHAR NOT NULL,
+                    source_url VARCHAR,
+                    type VARCHAR,
+                    install_command TEXT,
+                    start_command TEXT,
+                    healthcheck_url VARCHAR,
+                    required_env_vars TEXT,
+                    status VARCHAR DEFAULT 'pending',
+                    created_at TIMESTAMP,
+                    updated_at TIMESTAMP,
+                    user_id VARCHAR NOT NULL,
+                    FOREIGN KEY (plugin_id) REFERENCES plugin (id) ON DELETE CASCADE
+                )
+                """)
+                await db.execute(create_table_query)
+                await db.commit()
+                logger.info("plugin_service_runtime table created successfully")
+                return True
+            else:
+                logger.info("plugin_service_runtime table already exists")
+                return True
+                
+        except Exception as e:
+            logger.warning(f"Failed to create plugin_service_runtime table: {e}")
+            return False
+
     async def _create_database_records(self, user_id: str, db: AsyncSession) -> Dict[str, Any]:
         """Create plugin and module records in database"""
         try:
@@ -569,59 +612,120 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             
             logger.info(f"ChatWithYourDocuments: Creating database records - user_id: {user_id}, plugin_slug: {plugin_slug}, plugin_id: {plugin_id}")
             
-            plugin_stmt = text("""
-            INSERT INTO plugin
-            (id, name, description, version, type, enabled, icon, category, status,
-            official, author, last_updated, compatibility, downloads, scope,
-            bundle_method, bundle_location, is_local, long_description,
-            config_fields, messages, dependencies, created_at, updated_at, user_id,
-            plugin_slug, source_type, source_url, update_check_url, last_update_check,
-            update_available, latest_version, installation_type, permissions)
-            VALUES
-            (:id, :name, :description, :version, :type, :enabled, :icon, :category,
-            :status, :official, :author, :last_updated, :compatibility, :downloads,
-            :scope, :bundle_method, :bundle_location, :is_local, :long_description,
-            :config_fields, :messages, :dependencies, :created_at, :updated_at, :user_id,
-            :plugin_slug, :source_type, :source_url, :update_check_url, :last_update_check,
-            :update_available, :latest_version, :installation_type, :permissions)
-            """)
-            
-            await db.execute(plugin_stmt, {
-                'id': plugin_id,
-                'name': self.plugin_data['name'],
-                'description': self.plugin_data['description'],
-                'version': self.plugin_data['version'],
-                'type': self.plugin_data['type'],
-                'enabled': True,
-                'icon': self.plugin_data['icon'],
-                'category': self.plugin_data['category'],
-                'status': 'activated',
-                'official': self.plugin_data['official'],
-                'author': self.plugin_data['author'],
-                'last_updated': current_time,
-                'compatibility': self.plugin_data['compatibility'],
-                'downloads': 0,
-                'scope': self.plugin_data['scope'],
-                'bundle_method': self.plugin_data['bundle_method'],
-                'bundle_location': self.plugin_data['bundle_location'],
-                'is_local': self.plugin_data['is_local'],
-                'long_description': self.plugin_data['long_description'],
-                'config_fields': json.dumps({}),
-                'messages': None,
-                'dependencies': None,
-                'created_at': current_time,
-                'updated_at': current_time,
-                'user_id': user_id,
-                'plugin_slug': plugin_slug,
-                'source_type': self.plugin_data['source_type'],
-                'source_url': self.plugin_data['source_url'],
-                'update_check_url': self.plugin_data['update_check_url'],
-                'last_update_check': self.plugin_data['last_update_check'],
-                'update_available': self.plugin_data['update_available'],
-                'latest_version': self.plugin_data['latest_version'],
-                'installation_type': self.plugin_data['installation_type'],
-                'permissions': json.dumps(self.plugin_data['permissions'])
-            })
+            try:
+                # Test if the column exists by trying to insert with it
+                plugin_stmt = text("""
+                INSERT INTO plugin
+                (id, name, description, version, type, enabled, icon, category, status,
+                official, author, last_updated, compatibility, downloads, scope,
+                bundle_method, bundle_location, is_local, long_description,
+                config_fields, messages, dependencies, created_at, updated_at, user_id,
+                plugin_slug, source_type, source_url, update_check_url, last_update_check,
+                update_available, latest_version, installation_type, permissions, required_services_runtime)
+                VALUES
+                (:id, :name, :description, :version, :type, :enabled, :icon, :category,
+                :status, :official, :author, :last_updated, :compatibility, :downloads,
+                :scope, :bundle_method, :bundle_location, :is_local, :long_description,
+                :config_fields, :messages, :dependencies, :created_at, :updated_at, :user_id,
+                :plugin_slug, :source_type, :source_url, :update_check_url, :last_update_check,
+                :update_available, :latest_version, :installation_type, :permissions, :required_services_runtime)
+                """)
+                
+                await db.execute(plugin_stmt, {
+                    'id': plugin_id,
+                    'name': self.plugin_data['name'],
+                    'description': self.plugin_data['description'],
+                    'version': self.plugin_data['version'],
+                    'type': self.plugin_data['type'],
+                    'enabled': True,
+                    'icon': self.plugin_data['icon'],
+                    'category': self.plugin_data['category'],
+                    'status': 'activated',
+                    'official': self.plugin_data['official'],
+                    'author': self.plugin_data['author'],
+                    'last_updated': current_time,
+                    'compatibility': self.plugin_data['compatibility'],
+                    'downloads': 0,
+                    'scope': self.plugin_data['scope'],
+                    'bundle_method': self.plugin_data['bundle_method'],
+                    'bundle_location': self.plugin_data['bundle_location'],
+                    'is_local': self.plugin_data['is_local'],
+                    'long_description': self.plugin_data['long_description'],
+                    'config_fields': json.dumps({}),
+                    'messages': None,
+                    'dependencies': None,
+                    'created_at': current_time,
+                    'updated_at': current_time,
+                    'user_id': user_id,
+                    'plugin_slug': plugin_slug,
+                    'source_type': self.plugin_data['source_type'],
+                    'source_url': self.plugin_data['source_url'],
+                    'update_check_url': self.plugin_data['update_check_url'],
+                    'last_update_check': self.plugin_data['last_update_check'],
+                    'update_available': self.plugin_data['update_available'],
+                    'latest_version': self.plugin_data['latest_version'],
+                    'installation_type': self.plugin_data['installation_type'],
+                    'permissions': json.dumps(self.plugin_data['permissions']),
+                    'required_services_runtime': json.dumps(self.required_services_runtime)
+                })
+                
+            except Exception as column_error:
+                logger.warning(f"required_services_runtime column not found in plugin table: {column_error}")
+                
+                # Fallback: Insert without required_services_runtime column
+                plugin_stmt = text("""
+                INSERT INTO plugin
+                (id, name, description, version, type, enabled, icon, category, status,
+                official, author, last_updated, compatibility, downloads, scope,
+                bundle_method, bundle_location, is_local, long_description,
+                config_fields, messages, dependencies, created_at, updated_at, user_id,
+                plugin_slug, source_type, source_url, update_check_url, last_update_check,
+                update_available, latest_version, installation_type, permissions)
+                VALUES
+                (:id, :name, :description, :version, :type, :enabled, :icon, :category,
+                :status, :official, :author, :last_updated, :compatibility, :downloads,
+                :scope, :bundle_method, :bundle_location, :is_local, :long_description,
+                :config_fields, :messages, :dependencies, :created_at, :updated_at, :user_id,
+                :plugin_slug, :source_type, :source_url, :update_check_url, :last_update_check,
+                :update_available, :latest_version, :installation_type, :permissions)
+                """)
+                
+                await db.execute(plugin_stmt, {
+                    'id': plugin_id,
+                    'name': self.plugin_data['name'],
+                    'description': self.plugin_data['description'],
+                    'version': self.plugin_data['version'],
+                    'type': self.plugin_data['type'],
+                    'enabled': True,
+                    'icon': self.plugin_data['icon'],
+                    'category': self.plugin_data['category'],
+                    'status': 'activated',
+                    'official': self.plugin_data['official'],
+                    'author': self.plugin_data['author'],
+                    'last_updated': current_time,
+                    'compatibility': self.plugin_data['compatibility'],
+                    'downloads': 0,
+                    'scope': self.plugin_data['scope'],
+                    'bundle_method': self.plugin_data['bundle_method'],
+                    'bundle_location': self.plugin_data['bundle_location'],
+                    'is_local': self.plugin_data['is_local'],
+                    'long_description': self.plugin_data['long_description'],
+                    'config_fields': json.dumps({}),
+                    'messages': None,
+                    'dependencies': None,
+                    'created_at': current_time,
+                    'updated_at': current_time,
+                    'user_id': user_id,
+                    'plugin_slug': plugin_slug,
+                    'source_type': self.plugin_data['source_type'],
+                    'source_url': self.plugin_data['source_url'],
+                    'update_check_url': self.plugin_data['update_check_url'],
+                    'last_update_check': self.plugin_data['last_update_check'],
+                    'update_available': self.plugin_data['update_available'],
+                    'latest_version': self.plugin_data['latest_version'],
+                    'installation_type': self.plugin_data['installation_type'],
+                    'permissions': json.dumps(self.plugin_data['permissions'])
+                })
             
             modules_created = []
             for module_data in self.module_data:
@@ -662,6 +766,49 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                 
                 modules_created.append(module_id)
             
+            # Try to create service runtime records if table exists or can be created
+            services_created = []
+            service_table_available = await self._check_and_create_service_runtime_table(db)
+            
+            if service_table_available and self.required_services_runtime:
+                try:
+                    for service_data in self.required_services_runtime:
+                        service_id = f"{user_id}_{plugin_slug}_{service_data['name']}"
+                        
+                        service_stmt = text("""
+                        INSERT INTO plugin_service_runtime
+                        (id, plugin_id, name, source_url, type, install_command, start_command,
+                        healthcheck_url, required_env_vars, status, created_at, updated_at, user_id)
+                        VALUES
+                        (:id, :plugin_id, :name, :source_url, :type, :install_command, :start_command,
+                        :healthcheck_url, :required_env_vars, :status, :created_at, :updated_at, :user_id)
+                        """)
+                        
+                        await db.execute(service_stmt, {
+                            'id': service_id,
+                            'plugin_id': plugin_id,
+                            'name': service_data['name'],
+                            'source_url': service_data['source_url'],
+                            'type': service_data['type'],
+                            'install_command': service_data['install_command'],
+                            'start_command': service_data['start_command'],
+                            'healthcheck_url': service_data['healthcheck_url'],
+                            'required_env_vars': json.dumps(service_data['required_env_vars']),
+                            'status': 'pending',  # Default status for new services
+                            'created_at': current_time,
+                            'updated_at': current_time,
+                            'user_id': user_id
+                        })
+                        
+                        services_created.append(service_id)
+                    
+                    logger.info(f"Created {len(services_created)} service runtime records")
+                
+                except Exception as service_error:
+                    logger.warning(f"Failed to create service runtime records: {service_error}")
+                    # Don't fail the entire operation if service table creation fails
+                    services_created = []
+            
             # Commit the transaction
             await db.commit()
             logger.info(f"ChatWithYourDocuments: Database transaction committed successfully")
@@ -672,12 +819,17 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             verify_row = verify_result.fetchone()
             
             if verify_row:
-                logger.info(f"ChatWithYourDocuments: Successfully created and verified database records for plugin {plugin_id} with {len(modules_created)} modules")
+                logger.info(f"ChatWithYourDocuments: Successfully created and verified database records for plugin {plugin_id} with {len(modules_created)} modules and {len(services_created)} services")
             else:
                 logger.error(f"ChatWithYourDocuments: Plugin creation appeared to succeed but verification failed for plugin_id: {plugin_id}")
                 return {'success': False, 'error': 'Plugin creation verification failed'}
             
-            return {'success': True, 'plugin_id': plugin_id, 'modules_created': modules_created}
+            return {
+                'success': True, 
+                'plugin_id': plugin_id, 
+                'modules_created': modules_created,
+                'services_created': services_created
+            }
             
         except Exception as e:
             logger.error(f"Error creating database records: {e}")
@@ -687,7 +839,29 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
     async def _delete_database_records(self, user_id: str, plugin_id: str, db: AsyncSession) -> Dict[str, Any]:
         """Delete plugin and module records from database"""
         try:
-            # Delete modules first (foreign key constraint)
+            deleted_services = 0
+            
+            # Try to delete service runtime records first if table exists
+            try:
+                service_delete_stmt = text("""
+                DELETE FROM plugin_service_runtime 
+                WHERE plugin_id = :plugin_id AND user_id = :user_id
+                """)
+                
+                service_result = await db.execute(service_delete_stmt, {
+                    'plugin_id': plugin_id,
+                    'user_id': user_id
+                })
+                
+                deleted_services = service_result.rowcount
+                logger.info(f"Deleted {deleted_services} service runtime records")
+                
+            except Exception as service_error:
+                logger.warning(f"Failed to delete service runtime records (table may not exist): {service_error}")
+                # Continue with plugin deletion even if service deletion fails
+                deleted_services = 0
+            
+            # Delete modules (foreign key constraint)
             module_delete_stmt = text("""
             DELETE FROM module 
             WHERE plugin_id = :plugin_id AND user_id = :user_id
@@ -718,14 +892,18 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             # Commit the transaction
             await db.commit()
             
-            logger.info(f"Deleted database records for plugin {plugin_id} ({deleted_modules} modules)")
-            return {'success': True, 'deleted_modules': deleted_modules}
+            logger.info(f"Deleted database records for plugin {plugin_id} ({deleted_modules} modules, {deleted_services} services)")
+            return {
+                'success': True, 
+                'deleted_modules': deleted_modules,
+                'deleted_services': deleted_services
+            }
             
         except Exception as e:
             logger.error(f"Error deleting database records: {e}")
             await db.rollback()
             return {'success': False, 'error': str(e)}
-    
+
     async def _export_user_data(self, user_id: str, db: AsyncSession) -> Dict[str, Any]:
         """Export user-specific data for migration during updates"""
         try:
