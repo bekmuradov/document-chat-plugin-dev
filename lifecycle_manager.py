@@ -577,6 +577,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                 CREATE TABLE plugin_service_runtime (
                     id VARCHAR PRIMARY KEY,
                     plugin_id VARCHAR NOT NULL,
+                    plugin_slug VARCHAR NOT NULL,
                     name VARCHAR NOT NULL,
                     source_url VARCHAR,
                     type VARCHAR,
@@ -777,16 +778,17 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                         
                         service_stmt = text("""
                         INSERT INTO plugin_service_runtime
-                        (id, plugin_id, name, source_url, type, install_command, start_command,
+                        (id, plugin_id, plugin_slug, name, source_url, type, install_command, start_command,
                         healthcheck_url, required_env_vars, status, created_at, updated_at, user_id)
                         VALUES
-                        (:id, :plugin_id, :name, :source_url, :type, :install_command, :start_command,
+                        (:id, :plugin_id, :plugin_slug, :name, :source_url, :type, :install_command, :start_command,
                         :healthcheck_url, :required_env_vars, :status, :created_at, :updated_at, :user_id)
                         """)
                         
                         await db.execute(service_stmt, {
                             'id': service_id,
                             'plugin_id': plugin_id,
+                            'plugin_slug': plugin_slug,
                             'name': service_data['name'],
                             'source_url': service_data['source_url'],
                             'type': service_data['type'],
