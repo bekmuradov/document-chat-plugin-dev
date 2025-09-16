@@ -906,6 +906,153 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             await db.rollback()
             return {'success': False, 'error': str(e)}
 
+    async def _create_settings(self, user_id: str, db: AsyncSession) -> Dict[str, Any]:
+        """
+        Create settings definition and instance based on Docker Compose environment variables.
+        """
+        try:
+            logger.info(f"Starting settings creation for user {user_id}")
+            
+            # Use a unique ID for the new settings definition
+            definition_id = 'chat_with_document_processor_settings'
+
+            # Check if settings definition exists
+            definition = await db.execute(
+                text("SELECT id FROM settings_definitions WHERE id = :definition_id"),
+                {"definition_id": definition_id}
+            )
+            definition = definition.scalar_one_or_none()
+            
+            # Construct the default value dictionary from the assumed class attributes.
+            # Convert string environment variables to their appropriate types.
+            default_settings_value = {
+                "LLM_PROVIDER": 'ollama',
+                "EMBEDDING_PROVIDER": 'ollama',
+                "ENABLE_CONTEXTUAL_RETRIEVAL": True,
+                "OLLAMA_CONTEXTUAL_LLM_BASE_URL": 'http://localhost:11434',
+                "OLLAMA_CONTEXTUAL_LLM_MODEL": 'llama3.2:8b',
+                "OLLAMA_LLM_BASE_URL": 'http://localhost:11434',
+                "OLLAMA_LLM_MODEL": 'qwen3:8b',
+                "OLLAMA_EMBEDDING_BASE_URL": 'http://localhost:11434',
+                "OLLAMA_EMBEDDING_MODEL": 'mxbai-embed-large',
+                "DOCUMENT_PROCESSOR_API_URL": 'http://localhost:8080/documents/',
+                "DOCUMENT_PROCESSOR_API_KEY": 'default_api_key',
+                "DOCUMENT_PROCESSOR_TIMEOUT": 600,
+                "DOCUMENT_PROCESSOR_MAX_RETRIES": 3
+            }
+
+            # Create settings definition if it doesn't exist
+            if not definition:
+                logger.info("Settings definition not found, creating new one")
+                definition_data = {
+                    'id': definition_id,
+                    'name': 'Chat with Document Processor Settings',
+                    'description': 'Configure the Chat with Document Processor services.',
+                    'category': 'LLM and Embeddings',
+                    'type': 'object',
+                    'default_value': json.dumps(default_settings_value),
+                    'allowed_scopes': json.dumps(['user']),
+                    'validation': json.dumps({}),
+                    'is_multiple': False,
+                    'tags': json.dumps(['ollama', 'document-processor', 'settings']),
+                    'created_at': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    'updated_at': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                
+                definition_stmt = text("""
+                INSERT INTO settings_definitions
+                (id, name, description, category, type, default_value, allowed_scopes, validation, is_multiple, tags, created_at, updated_at)
+                VALUES
+                (:id, :name, :description, :category, :type, :default_value, :allowed_scopes, :validation, :is_multiple, :tags, :created_at, :updated_at)
+                """)
+                
+                try:
+                    await db.execute(definition_stmt, definition_data)
+                    logger.info("Successfully created settings definition")
+                except Exception as def_error:
+                    logger.error(f"Failed to create settings definition: {def_error}")
+            else:
+                logger.info("Settings definition already exists")
+
+            # Create settings instance for user
+            existing_instance = await db.execute(
+                text("SELECT id FROM settings_instances WHERE definition_id = :definition_id AND user_id = :user_id"),
+                {"definition_id": definition_id, "user_id": user_id}
+            )
+            existing_instance = existing_instance.scalar_one_or_none()
+            
+            if not existing_instance:
+                instance_data = {
+                    'id': f"ollama_doc_proc_settings_{user_id}",
+                    'name': 'LLM and Document Processor Settings',
+                    'definition_id': definition_id,
+                    'scope': 'user',
+                    'user_id': user_id,
+                    'value': json.dumps(default_settings_value), # Use the same default values for the initial instance
+                    'created_at': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    'updated_at': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                
+                instance_stmt = text("""
+                INSERT INTO settings_instances
+                (id, name, definition_id, scope, user_id, value, created_at, updated_at)
+                VALUES
+                (:id, :name, :definition_id, :scope, :user_id, :value, :created_at, :updated_at)
+                """)
+                
+                try:
+                    await db.execute(instance_stmt, instance_data)
+                    logger.info(f"Successfully created settings instance for user {user_id}")
+                except Exception as inst_error:
+                    logger.error(f"Failed to create settings instance: {inst_error}")
+                    return {'success': False, 'error': f'Failed to create settings instance: {str(inst_error)}'}
+            else:
+                logger.info(f"Settings instance already exists for user {user_id}")
+
+            logger.info(f"Settings creation completed successfully for user {user_id}")
+            return {
+                'success': True,
+                'settings_created': [definition_id, f"ollama_doc_proc_settings_{user_id}"]
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to create settings: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return {'success': False, 'error': str(e)}
+
+    async def _remove_settings(self, user_id: str, db: AsyncSession) -> Dict[str, Any]:
+        """Remove settings instance for user"""
+        try:
+            # Use the same unique ID for the settings definition
+            definition_id = 'chat_with_document_processor_settings'
+
+            # Remove settings instance
+            settings_instance = await db.execute(
+                text("SELECT id FROM settings_instances WHERE definition_id = :definition_id AND user_id = :user_id"),
+                {"definition_id": definition_id, "user_id": user_id}
+            )
+            settings_instance = settings_instance.scalar_one_or_none()
+            
+            if settings_instance:
+                delete_stmt = text("""
+                DELETE FROM settings_instances 
+                WHERE definition_id = :definition_id AND user_id = :user_id
+                """)
+                
+                await db.execute(delete_stmt, {
+                    'definition_id': definition_id,
+                    'user_id': user_id
+                })
+                
+                return {'success': True, 'settings_removed': 1}
+            
+            return {'success': True, 'settings_removed': 0}
+
+        except Exception as e:
+            logger.error(f"Failed to remove settings: {e}")
+            return {'success': False, 'error': str(e)}
+
     async def _export_user_data(self, user_id: str, db: AsyncSession) -> Dict[str, Any]:
         """Export user-specific data for migration during updates"""
         try:
