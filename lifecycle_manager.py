@@ -983,7 +983,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             
             if not existing_instance:
                 instance_data = {
-                    'id': f"ollama_doc_proc_settings_{user_id}",
+                    'id': f"chat_with_doc_proc_settings_{user_id}",
                     'name': 'LLM and Document Processor Settings',
                     'definition_id': definition_id,
                     'scope': 'user',
@@ -1012,7 +1012,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             logger.info(f"Settings creation completed successfully for user {user_id}")
             return {
                 'success': True,
-                'settings_created': [definition_id, f"ollama_doc_proc_settings_{user_id}"]
+                'settings_created': [definition_id, f"chat_with_doc_proc_settings_{user_id}"]
             }
 
         except Exception as e:
