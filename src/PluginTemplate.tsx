@@ -6,11 +6,12 @@ import {
   Loader2,
   ArrowLeft,
   AlertCircle,
+  Settings,
 } from 'lucide-react';
-import { ChatView, CollectionsView, DocumentsView, CreateSessionForm } from './components';
+import { ChatView, CollectionsView, DocumentsView, CreateSessionForm, ChatCollectionsSettings } from './components';
 import { API_BASE } from './config';
 import { Collection, ChatSession, ViewType, Document, ChatMessage } from './custom-types';
-import type { TemplateTheme } from './types';
+import type { TemplateTheme, Services } from './types';
 
 // Version information
 export const version = '1.0.0';
@@ -32,7 +33,7 @@ export const version = '1.0.0';
  * 13. add markdown rendering for chat interface
  */
 
-interface Services {
+interface ComponentServices {
   api?: {
     get: (url: string) => Promise<any>;
     post: (url: string, data?: any) => Promise<any>;
@@ -52,6 +53,9 @@ interface Services {
   settings?: {
     getSetting?: (key: string) => Promise<any>;
     setSetting?: (key: string, value: any) => Promise<void>;
+    registerSettingDefinition?: (definition: any) => Promise<void>;
+    getSettingDefinitions?: (filter?: { id?: string; category?: string; tags?: string[] }) => Promise<any[]>;
+    subscribe?: (key: string, callback: (value: any) => void) => () => void;
   };
   pageContext?: {
     getCurrentPageContext: () => PageContext | null;
@@ -468,6 +472,13 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
         documents: [],
         chatSessions: [],
       });
+    } else if (currentView === ViewType.SETTINGS) {
+      this.setState({
+        currentView: ViewType.COLLECTIONS,
+        selectedCollection: null,
+        documents: [],
+        chatSessions: [],
+      });
     }
   }
 
@@ -541,8 +552,18 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
                   {currentView === ViewType.COLLECTIONS && 'Collections'}
                   {currentView === ViewType.DOCUMENTS && `Documents - ${selectedCollection?.name}`}
                   {currentView === ViewType.CHAT && `Chat - ${selectedChatSession?.name}`}
+                  {currentView === ViewType.SETTINGS && 'Plugin Settings'}
                 </h1>
               </div>
+              {currentView !== ViewType.SETTINGS && (
+                <button
+                    onClick={() => this.handleViewChange(ViewType.SETTINGS)}
+                    className="p-2 rounded-full text-gray-600 hover:bg-gray-100"
+                    title="Settings"
+                >
+                    <Settings className="w-5 h-5" />
+                </button>
+              )}
               {selectedCollection && (
                 <div className="flex space-x-2">
                   <button
@@ -629,6 +650,9 @@ class ChatCollectionsPlugin extends React.Component<ChatCollectionsPluginProps, 
               onMessageSent={() => this.loadChatMessages(selectedChatSession.id)}
               setError={(msg) => this.setState({ error: msg })}
             />
+          )}
+          {currentView === ViewType.SETTINGS && (
+            <ChatCollectionsSettings services={services} />
           )}
         </div>
       </div>

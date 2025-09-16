@@ -4,7 +4,8 @@ import { ApiService } from "./types";
 export enum ViewType {
   COLLECTIONS = 'collections',
   DOCUMENTS = 'documents',
-  CHAT = 'chat'
+  CHAT = 'chat',
+  SETTINGS = 'settings'
 }
 
 export enum MessageRole {

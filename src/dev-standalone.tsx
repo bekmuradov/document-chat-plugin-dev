@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import ChatCollectionsPlugin from './PluginTemplate';
 import './PluginTemplate.css';
-import type { Services, TemplateTheme } from './types';
+import type { Services, TemplateTheme, SettingsService } from './types';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { API_BASE } from './config';
@@ -173,6 +173,43 @@ function isError(error: unknown): error is Error {
   return error instanceof Error;
 }
 
+const defaultComponentSettings = {
+  "id": "chat_with_document_processor_settings",
+  "name": "Chat with Document Processor Settings",
+  "description": "Configure the Chat with Document Processor services.",
+  "category": "LLM and Embeddings",
+  "type": "object",
+  "default_value": {
+    "LLM_PROVIDER": "ollama",
+    "EMBEDDING_PROVIDER": "ollama",
+    "ENABLE_CONTEXTUAL_RETRIEVAL": true,
+    "OLLAMA_CONTEXTUAL_LLM_BASE_URL": "http://localhost:11434",
+    "OLLAMA_CONTEXTUAL_LLM_MODEL": "llama3.2:8b",
+    "OLLAMA_LLM_BASE_URL": "http://localhost:11434",
+    "OLLAMA_LLM_MODEL": "qwen3:8b",
+    "OLLAMA_EMBEDDING_BASE_URL": "http://localhost:11434",
+    "OLLAMA_EMBEDDING_MODEL": "mxbai-embed-large",
+    "DOCUMENT_PROCESSOR_API_URL": "http://localhost:8080/documents/",
+    "DOCUMENT_PROCESSOR_API_KEY": "default_api_key",
+    "DOCUMENT_PROCESSOR_TIMEOUT": 600,
+    "DOCUMENT_PROCESSOR_MAX_RETRIES": 3
+  },
+  "allowed_scopes": [
+    "user"
+  ],
+  "validation": {},
+  "is_multiple": false,
+  "tags": [
+    "ollama",
+    "document-processor",
+    "settings"
+  ],
+  "created_at": "2025-09-16 15:53:32",
+  "updated_at": "2025-09-16 15:53:32"
+}
+
+const componentSettings: SettingsService = {};
+
 const componentServices: Services = {
   api: {
     get: async (url) => {
@@ -329,6 +366,9 @@ const componentServices: Services = {
     },
     setSetting: async (id: string, value: any) => {
       console.log('Mock setSetting:', id, value);
+    },
+    getSettingDefinitions: async (filters) => {
+      return [defaultComponentSettings]
     }
   },
   theme: {

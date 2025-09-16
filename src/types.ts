@@ -27,11 +27,11 @@ export interface ThemeService {
 }
 
 export interface SettingsService {
-  // get: (key: string) => any;
-  // set: (key: string, value: any) => Promise<void>;
-  getSetting?: (id: string) => Promise<any>;
-  setSetting?: (id: string, value: any) => Promise<any>;
-  // getSettingDefinitions?: () => Promise<any>;
+  getSetting?: (name: string, context?: { userId?: string; pageId?: string }) => Promise<any>;
+  setSetting?: (name: string, value: any, context?: { userId?: string; pageId?: string }) => Promise<void>;
+  registerSettingDefinition?: (definition: any) => Promise<void>;
+  getSettingDefinitions?: (filter?: { id?: string; category?: string; tags?: string[] }) => Promise<any[]>;
+  subscribe?: (key: string, callback: (value: any) => void) => () => void;
 }
 
 export interface PageContextService {

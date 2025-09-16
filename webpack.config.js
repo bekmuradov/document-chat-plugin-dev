@@ -9,7 +9,14 @@ module.exports = {
   mode: "development",
   entry: "./src/index",
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    // path: path.resolve(
+    //   __dirname,
+    //   "C:\\Users\\beck\\Documents\\GitHub\\brain_drive\\BrainDrive\\backend\\plugins\\shared\\ChatWithYourDocuments\\v1.0.1\\dist"
+    // ),
+    path: path.resolve(
+      __dirname,
+      "dist"
+    ),
     publicPath: "auto",
     clean: true,
     library: {
