@@ -262,13 +262,28 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             if not db_result['success']:
                 return db_result
             
+            # Create settings definition and instance
+            settings_result = await self._create_settings(user_id, db)
+            if not settings_result['success']:
+                return settings_result
+            
+            # Commit all database changes
+            try:
+                await db.commit()
+                logger.info(f"BrainDrive OpenRouter: Database changes committed successfully")
+            except Exception as commit_error:
+                logger.error(f"BrainDrive OpenRouter: Failed to commit database changes: {commit_error}")
+                await db.rollback()
+                return {'success': False, 'error': f'Failed to commit database changes: {str(commit_error)}'}
+            
             logger.info(f"ChatWithYourDocuments: User installation completed for {user_id}")
             return {
                 'success': True,
                 'plugin_id': db_result['plugin_id'],
                 'plugin_slug': self.plugin_data['plugin_slug'],
                 'plugin_name': self.plugin_data['name'],
-                'modules_created': db_result['modules_created']
+                'modules_created': db_result['modules_created'],
+                'settings_created': settings_result['settings_created']
             }
             
         except Exception as e:
@@ -290,11 +305,24 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             if not delete_result['success']:
                 return delete_result
             
+            # Remove settings instance
+            settings_result = await self._remove_settings(user_id, db)
+
+            # Commit all database changes
+            try:
+                await db.commit()
+                logger.info(f"BrainDrive OpenRouter: Uninstall changes committed successfully")
+            except Exception as commit_error:
+                logger.error(f"BrainDrive OpenRouter: Failed to commit uninstall changes: {commit_error}")
+                await db.rollback()
+                return {'success': False, 'error': f'Failed to commit uninstall changes: {str(commit_error)}'}
+            
             logger.info(f"ChatWithYourDocuments: User uninstallation completed for {user_id}")
             return {
                 'success': True,
                 'plugin_id': plugin_id,
-                'deleted_modules': delete_result['deleted_modules']
+                'deleted_modules': delete_result['deleted_modules'],
+                'settings_removed': settings_result.get('settings_removed', 0)
             }
             
         except Exception as e:
