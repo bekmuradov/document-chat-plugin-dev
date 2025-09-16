@@ -52,6 +52,8 @@ const CHAT_SETTINGS = {
 };
 
 export class ChatCollectionsSettings extends React.Component<ChatCollectionsSettingsProps, ChatCollectionsSettingsState> {
+    private settingsUnsubscribe?: () => void;
+
     constructor(props: ChatCollectionsSettingsProps) {
         super(props);
         this.state = {
@@ -70,18 +72,64 @@ export class ChatCollectionsSettings extends React.Component<ChatCollectionsSett
         await this.loadSettings();
     }
 
+    /**
+     * Initialize settings subscription for real-time updates (optional)
+     */
+    initializeSettingsSubscription() {
+        if (!this.props.services?.settings?.subscribe) {
+            console.log('ComponentOpenRouterKeys: Settings subscription not available (optional)');
+            return;
+        }
+
+        // Subscribe to settings changes
+        this.settingsUnsubscribe = this.props.services.settings.subscribe(
+            CHAT_SETTINGS.DEFINITION_ID,
+            (value: any) => {
+                console.log('Plugin settings updated:', value);
+                if (value) {
+                this.processApiKeyData(value);
+                }
+            }
+        );
+    }
+
+    private processApiKeyData = (value: any) => {
+        console.log('DOCUMENT_PROCESSOR_API_KEY: Processing API key data:', value);
+        
+        // Handle different data formats from settings service
+        let apiKeyData = value;
+        
+        if (typeof value === 'string') {
+        try {
+            apiKeyData = JSON.parse(value);
+        } catch (e) {
+            // Treat as raw API key string if not JSON
+            apiKeyData = { apiKey: value };
+        }
+        }
+        
+        // Extract the API key
+        const key = apiKeyData?.apiKey || '';
+        
+        console.log('DOCUMENT_PROCESSOR_API_KEY: Extracted API key:', key ? 'Key present (hidden)' : 'No key');
+        
+        this.setState({
+            settings: {
+                ...this.state.settings,
+                DOCUMENT_PROCESSOR_API_KEY: key,
+            },
+            isLoading: false,
+            error: null,
+            hasUnsavedChanges: false
+        });
+    };
+
     private async loadSettings() {
         const { services } = this.props;
         this.setState({ isLoading: true, error: null });
 
         try {
-            if (services.settings?.getSetting) {
-                // Prefer Settings Service
-                const settingValue = await services.settings.getSetting(CHAT_SETTINGS.DEFINITION_ID);
-                if (settingValue) {
-                    this.setState({ settings: settingValue });
-                }
-            } else if (services.api?.get) {
+            if (services.api?.get) {
                 // Fallback to API Service
                 const response = await services.api.get('/api/v1/settings/instances', {
                     params: {
@@ -96,6 +144,12 @@ export class ChatCollectionsSettings extends React.Component<ChatCollectionsSett
                         instanceValue = JSON.parse(instanceValue);
                     }
                     this.setState({ settings: instanceValue });
+                }
+            } else if (services.settings?.getSetting) {
+                // Prefer Settings Service
+                const settingValue = await services.settings.getSetting(CHAT_SETTINGS.DEFINITION_ID);
+                if (settingValue) {
+                    this.setState({ settings: settingValue });
                 }
             } else {
                 this.setState({ error: 'No service available to load settings' });
