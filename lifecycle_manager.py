@@ -101,7 +101,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         self.plugin_data = {
             "name": "BrainDriveDocumentChat",
             "description": "BrainDrive Chat With Your Documents plugin",
-            "version": "1.11.2",
+            "version": "1.11.4",
             "type": "frontend",
             "icon": "Puzzle",  # TODO: Choose an appropriate icon
             "category": "ai",  # TODO: Choose appropriate category
