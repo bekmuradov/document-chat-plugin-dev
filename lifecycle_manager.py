@@ -99,9 +99,9 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         """Initialize the lifecycle manager"""
         # TEMPLATE: Define plugin-specific data - TODO: Customize for your plugin
         self.plugin_data = {
-            "name": "ChatWithYourDocuments",
-            "description": "Chat With Your Documents BrainDrive plugin",
-            "version": "1.0.1",
+            "name": "BrainDriveDocumentChat",
+            "description": "BrainDrive Chat With Your Documents plugin",
+            "version": "1.11.2",
             "type": "frontend",
             "icon": "Puzzle",  # TODO: Choose an appropriate icon
             "category": "ai",  # TODO: Choose appropriate category
