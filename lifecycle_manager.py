@@ -108,12 +108,12 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             "official": False,  # TODO: Set to True if this is an official plugin
             "author": "BrainDrive",  # TODO: Update with your name/organization
             "compatibility": "1.0.0",
-            "scope": "ChatWithYourDocuments",  # TODO: Update scope name
+            "scope": "BrainDriveDocumentChat",  # TODO: Update scope name
             "bundle_method": "webpack",
             "bundle_location": "dist/remoteEntry.js",
             "is_local": False,
             "long_description": "A comprehensive template for creating BrainDrive plugins with React, TypeScript, and Module Federation. Includes examples of service integration, theme support, and component patterns.",
-            "plugin_slug": "ChatWithYourDocuments",  # TODO: Update plugin slug
+            "plugin_slug": "BrainDriveDocumentChat",  # TODO: Update plugin slug
             # Update tracking fields (matching plugin model)
             "source_type": "github",  # TODO: Update if using different source
             "source_url": "https://github.com/bekmuradov/BrainDrive-Plugins",  # TODO: Update URL
