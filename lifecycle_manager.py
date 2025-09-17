@@ -99,8 +99,8 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         """Initialize the lifecycle manager"""
         # TEMPLATE: Define plugin-specific data - TODO: Customize for your plugin
         self.plugin_data = {
-            "name": "BrainDriveDocumentChat",
-            "description": "BrainDrive Chat With Your Documents plugin",
+            "name": "ChatWithYourDocuments",
+            "description": "Chat With Your Documents BrainDrive plugin",
             "version": "1.11.4",
             "type": "frontend",
             "icon": "Puzzle",  # TODO: Choose an appropriate icon
@@ -108,12 +108,12 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             "official": False,  # TODO: Set to True if this is an official plugin
             "author": "BrainDrive",  # TODO: Update with your name/organization
             "compatibility": "1.0.0",
-            "scope": "BrainDriveDocumentChat",  # TODO: Update scope name
+            "scope": "ChatWithYourDocuments",  # TODO: Update scope name
             "bundle_method": "webpack",
             "bundle_location": "dist/remoteEntry.js",
             "is_local": False,
             "long_description": "A comprehensive template for creating BrainDrive plugins with React, TypeScript, and Module Federation. Includes examples of service integration, theme support, and component patterns.",
-            "plugin_slug": "BrainDriveDocumentChat",  # TODO: Update plugin slug
+            "plugin_slug": "ChatWithYourDocuments",  # TODO: Update plugin slug
             # Update tracking fields (matching plugin model)
             "source_type": "github",  # TODO: Update if using different source
             "source_url": "https://github.com/bekmuradov/BrainDrive-Plugins",  # TODO: Update URL
@@ -153,7 +153,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         # TEMPLATE: Define module data - TODO: Customize for your plugin's modules
         self.module_data = [
             {
-                "name": "ChatWithYourDocuments",  # TODO: Update module name
+                "name": "BrainDriveDocumentChat",  # TODO: Update module name
                 "display_name": "Chat With Documents Interface",  # TODO: Update display name
                 "description": "A template component for BrainDrive plugins",  # TODO: Update description
                 "icon": "Puzzle",  # TODO: Choose appropriate icon
