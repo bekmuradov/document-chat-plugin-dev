@@ -3,11 +3,11 @@
 
 // Service interfaces - these match the BrainDrive service contracts
 export interface ApiService {
-  get: (url: string, options?: any) => Promise<ApiResponse>;
-  post: (url: string, data: any, options?: any) => Promise<ApiResponse>;
-  put: (url: string, data: any, options?: any) => Promise<ApiResponse>;
-  delete: (url: string, options?: any) => Promise<ApiResponse>;
-  postStreaming?: (url: string, data: any, onChunk: (chunk: string) => void, options?: any) => Promise<ApiResponse>;
+  get: <T>(url: string, options?: any) => Promise<T>;
+  post: <T>(url: string, data: any, options?: any) => Promise<T>;
+  put: <T>(url: string, data: any, options?: any) => Promise<T>;
+  delete: <T>(url: string, options?: any) => Promise<T>;
+  postStreaming?: <T>(url: string, data: any, onChunk: (chunk: string) => void, options?: any) => Promise<T>;
 }
 
 export interface EventService {
