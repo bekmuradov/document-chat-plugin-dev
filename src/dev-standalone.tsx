@@ -30,7 +30,7 @@ if (module.hot) {
 // Mock services for standalone development
 const mockServices: Services = {
   api: {
-    get: async (url: string) => {
+    get: async (url: string): Promise<any> => {
       console.log('Mock API GET:', url);
       
       // Mock different endpoints
@@ -108,17 +108,17 @@ const mockServices: Services = {
       return [];
     },
     
-    post: async (url: string, data?: any) => {
+    post: async (url: string, data?: any): Promise<any> => {
       console.log('Mock API POST:', url, data);
       return { success: true, id: Math.random().toString(36) };
     },
     
-    put: async (url: string, data?: any) => {
+    put: async (url: string, data?: any): Promise<any> => {
       console.log('Mock API PUT:', url, data);
       return { success: true };
     },
     
-    delete: async (url: string) => {
+    delete: async (url: string): Promise<any> => {
       console.log('Mock API DELETE:', url);
       return { success: true };
     }
@@ -273,7 +273,7 @@ const componentServices: Services = {
       
       return await response.json();
     },
-    put: async (url: string, data: any) => {
+    put: async (url: string, data: any): Promise<any> => {
       console.log('Mock API PUT:', url, data);
       return {
         data: { success: true },
@@ -282,7 +282,7 @@ const componentServices: Services = {
         timestamp: new Date().toISOString()
       };
     },
-    delete: async (url: string) => {
+    delete: async (url: string): Promise<any> => {
       console.log('Mock API DELETE:', url);
       return {
         data: { success: true },

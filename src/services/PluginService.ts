@@ -1,8 +1,8 @@
 import { ApiService, PluginData, ApiResponse } from '../types';
 
 interface IApiService extends ApiService {
-  put: (url: string, data: any, options?: any) => Promise<ApiResponse>;
-  delete: (url: string, options?: any) => Promise<ApiResponse>;
+  put: (url: string, data: any, options?: any) => Promise<any>;
+  delete: (url: string, options?: any) => Promise<any>;
 }
 
 export class PluginService {
@@ -22,7 +22,7 @@ export class PluginService {
     }
 
     try {
-      const response = await this.apiService.get('/api/plugin-template/data');
+      const response: any = await this.apiService.get('/api/plugin-template/data');
       return response.data;
     } catch (error) {
       console.error('PluginService: Failed to fetch data:', error);
