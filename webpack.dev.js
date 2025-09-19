@@ -56,7 +56,7 @@ module.exports = {
       directory: path.join(__dirname, "public"),
     },
     hot: true,
-    open: true, // Auto-open browser
+    open: false, // Auto-open browser
     historyApiFallback: true,
     client: {
       overlay: {
