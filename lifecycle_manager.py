@@ -101,7 +101,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         self.plugin_data = {
             "name": "ChatWithYourDocuments",
             "description": "Chat With Your Documents BrainDrive plugin",
-            "version": "1.11.8",
+            "version": "1.11.9",
             "type": "frontend",
             "icon": "Puzzle",  # TODO: Choose an appropriate icon
             "category": "ai",  # TODO: Choose appropriate category
@@ -810,10 +810,10 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                         service_stmt = text("""
                         INSERT INTO plugin_service_runtime
                         (id, plugin_id, plugin_slug, name, source_url, type, install_command, start_command,
-                        healthcheck_url, required_env_vars, status, created_at, updated_at, user_id)
+                        healthcheck_url, definition_id, required_env_vars, status, created_at, updated_at, user_id)
                         VALUES
                         (:id, :plugin_id, :plugin_slug, :name, :source_url, :type, :install_command, :start_command,
-                        :healthcheck_url, :required_env_vars, :status, :created_at, :updated_at, :user_id)
+                        :healthcheck_url, :definition_id, :required_env_vars, :status, :created_at, :updated_at, :user_id)
                         """)
                         
                         await db.execute(service_stmt, {
@@ -826,6 +826,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                             'install_command': service_data['install_command'],
                             'start_command': service_data['start_command'],
                             'healthcheck_url': service_data['healthcheck_url'],
+                            'definition_id': service_data['definition_id'],
                             'required_env_vars': json.dumps(service_data['required_env_vars']),
                             'status': 'pending',  # Default status for new services
                             'created_at': current_time,
