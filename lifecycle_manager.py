@@ -101,7 +101,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         self.plugin_data = {
             "name": "ChatWithYourDocuments",
             "description": "Chat With Your Documents BrainDrive plugin",
-            "version": "1.11.6",
+            "version": "1.11.7",
             "type": "frontend",
             "icon": "Puzzle",  # TODO: Choose an appropriate icon
             "category": "ai",  # TODO: Choose appropriate category
@@ -153,7 +153,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         # TEMPLATE: Define module data - TODO: Customize for your plugin's modules
         self.module_data = [
             {
-                "name": "ChatWithYourDocuments",  # TODO: Update module name
+                "name": "ChatWithYourDocumentsModule",  # Updated to avoid matching plugin slug
                 "display_name": "Chat With Documents Interface",  # TODO: Update display name
                 "description": "A template component for BrainDrive plugins",  # TODO: Update description
                 "icon": "Puzzle",  # TODO: Choose appropriate icon

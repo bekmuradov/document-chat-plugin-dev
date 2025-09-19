@@ -55,7 +55,7 @@ module.exports = {
       library: { type: "var", name: "ChatWithYourDocuments" },
       filename: "remoteEntry.js",
       exposes: {
-        "./ChatWithYourDocuments": "./src/index",
+        "./ChatWithYourDocumentsModule": "./src/index",
       },
       shared: {
         react: {
