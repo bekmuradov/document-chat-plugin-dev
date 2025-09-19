@@ -125,6 +125,8 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             "permissions": ["storage.read", "storage.write", "api.access"]  # TODO: Customize permissions
         }
 
+        self.settings_definition_id = 'chat_with_document_processor_settings'
+
         self.required_services_runtime = [
             {
                 "name": "cwyd_service",
@@ -133,6 +135,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                 "install_command": "",
                 "start_command": "docker compose up --build -d",
                 "healthcheck_url": "http://localhost:8000/health",
+                "definition_id": self.settings_definition_id,
                 "required_env_vars": [
                     "LLM_PROVIDER",
                     "EMBEDDING_PROVIDER",
@@ -942,7 +945,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
             logger.info(f"Starting settings creation for user {user_id}")
             
             # Use a unique ID for the new settings definition
-            definition_id = 'chat_with_document_processor_settings'
+            definition_id = self.settings_definition_id
 
             # Check if settings definition exists
             definition = await db.execute(
@@ -958,7 +961,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                 "EMBEDDING_PROVIDER": 'ollama',
                 "ENABLE_CONTEXTUAL_RETRIEVAL": True,
                 "OLLAMA_CONTEXTUAL_LLM_BASE_URL": 'http://localhost:11434',
-                "OLLAMA_CONTEXTUAL_LLM_MODEL": 'llama3.2:8b',
+                "OLLAMA_CONTEXTUAL_LLM_MODEL": 'llama3.2:3b',
                 "OLLAMA_LLM_BASE_URL": 'http://localhost:11434',
                 "OLLAMA_LLM_MODEL": 'qwen3:8b',
                 "OLLAMA_EMBEDDING_BASE_URL": 'http://localhost:11434',
