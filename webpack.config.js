@@ -11,7 +11,7 @@ module.exports = {
   output: {
     // path: path.resolve(
     //   __dirname,
-    //   "C:\\Users\\beck\\Documents\\GitHub\\brain_drive\\BrainDrive\\backend\\plugins\\shared\\ChatWithYourDocuments\\v1.0.1\\dist"
+    //   "C:\\Users\\beck\\Documents\\GitHub\\brain_drive\\BrainDrive\\backend\\plugins\\shared\\ChatWithYourDocuments\\v1.11.7\\dist"
     // ),
     path: path.resolve(
       __dirname,
