@@ -101,7 +101,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         self.plugin_data = {
             "name": "ChatWithYourDocuments",
             "description": "Chat With Your Documents BrainDrive plugin",
-            "version": "1.11.9",
+            "version": "1.12.0",
             "type": "frontend",
             "icon": "Puzzle",  # TODO: Choose an appropriate icon
             "category": "ai",  # TODO: Choose appropriate category
@@ -150,6 +150,36 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                     "DOCUMENT_PROCESSOR_TIMEOUT",
                     "DOCUMENT_PROCESSOR_MAX_RETRIES",
                 ]
+            },
+            {
+                "name": "document_processing_service",
+                "source_url": "https://github.com/BrainDriveAI/Document-Processing-Service",
+                "type": "docker-compose",
+                "install_command": "",
+                "start_command": "docker compose up --build -d",
+                "healthcheck_url": "http://localhost:8080/health",
+                "definition_id": self.settings_definition_id,
+                "required_env_vars": {
+                    # Authentication
+                    "DISABLE_AUTH": "true",
+                    "AUTH_METHOD": "api_key",
+                    "AUTH_API_KEY": "",
+                    "JWT_SECRET": "",
+                    "JWT_ALGORITHM": "HS256",
+                    "JWT_EXPIRE_MINUTES": "60",
+
+                    # Document processing
+                    "SPACY_MODEL": "en_core_web_sm",
+                    "DEFAULT_CHUNKING_STRATEGY": "hierarchical",
+                    "DEFAULT_CHUNK_SIZE": "1000",
+                    "DEFAULT_CHUNK_OVERLAP": "200",
+                    "MIN_CHUNK_SIZE": "100",
+                    "MAX_CHUNK_SIZE": "2000",
+
+                    # Logging
+                    "LOG_FORMAT": "console",
+                    "LOG_FILE": "/app/logs/app.log"
+                }
             }
         ]
         
