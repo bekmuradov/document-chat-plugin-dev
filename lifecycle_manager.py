@@ -101,7 +101,7 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
         self.plugin_data = {
             "name": "ChatWithYourDocuments",
             "description": "Chat With Your Documents BrainDrive plugin",
-            "version": "1.12.0",
+            "version": "1.0.1",
             "type": "frontend",
             "icon": "Puzzle",  # TODO: Choose an appropriate icon
             "category": "ai",  # TODO: Choose appropriate category
@@ -159,27 +159,27 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                 "start_command": "docker compose up --build -d",
                 "healthcheck_url": "http://localhost:8080/health",
                 "definition_id": self.settings_definition_id,
-                "required_env_vars": {
+                "required_env_vars": [
                     # Authentication
-                    "DISABLE_AUTH": "true",
-                    "AUTH_METHOD": "api_key",
-                    "AUTH_API_KEY": "",
-                    "JWT_SECRET": "",
-                    "JWT_ALGORITHM": "HS256",
-                    "JWT_EXPIRE_MINUTES": "60",
+                    "DISABLE_AUTH",
+                    "AUTH_METHOD",
+                    "AUTH_API_KEY",
+                    "JWT_SECRET",
+                    "JWT_ALGORITHM",
+                    "JWT_EXPIRE_MINUTES",
 
                     # Document processing
-                    "SPACY_MODEL": "en_core_web_sm",
-                    "DEFAULT_CHUNKING_STRATEGY": "hierarchical",
-                    "DEFAULT_CHUNK_SIZE": "1000",
-                    "DEFAULT_CHUNK_OVERLAP": "200",
-                    "MIN_CHUNK_SIZE": "100",
-                    "MAX_CHUNK_SIZE": "2000",
+                    "SPACY_MODEL",
+                    "DEFAULT_CHUNKING_STRATEGY",
+                    "DEFAULT_CHUNK_SIZE",
+                    "DEFAULT_CHUNK_OVERLAP",
+                    "MIN_CHUNK_SIZE",
+                    "MAX_CHUNK_SIZE",
 
                     # Logging
-                    "LOG_FORMAT": "console",
-                    "LOG_FILE": "/app/logs/app.log"
-                }
+                    "LOG_FORMAT",
+                    "LOG_FILE"
+                ]
             }
         ]
         
@@ -1000,7 +1000,22 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                 "DOCUMENT_PROCESSOR_API_URL": 'http://localhost:8080/documents/',
                 "DOCUMENT_PROCESSOR_API_KEY": 'default_api_key',
                 "DOCUMENT_PROCESSOR_TIMEOUT": 600,
-                "DOCUMENT_PROCESSOR_MAX_RETRIES": 3
+                "DOCUMENT_PROCESSOR_MAX_RETRIES": 3,
+                # Document Processing Service
+                "DISABLE_AUTH": True,
+                "AUTH_METHOD": 'api_key',
+                "AUTH_API_KEY": '',
+                "JWT_SECRET": '',
+                "JWT_ALGORITHM": 'HS256',
+                "JWT_EXPIRE_MINUTES": 60,
+                "SPACY_MODEL": 'en_core_web_sm',
+                "DEFAULT_CHUNKING_STRATEGY": 'hierarchical',
+                "DEFAULT_CHUNK_SIZE": 1000,
+                "DEFAULT_CHUNK_OVERLAP": 200,
+                "MIN_CHUNK_SIZE": 100,
+                "MAX_CHUNK_SIZE": 2000,
+                "LOG_FORMAT": 'console',
+                "LOG_FILE": '/app/logs/app.log'
             }
 
             # Create settings definition if it doesn't exist
