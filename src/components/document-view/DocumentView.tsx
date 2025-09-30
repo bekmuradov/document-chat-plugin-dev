@@ -297,7 +297,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
     formData.append('collection_id', this.props.collection.id);
 
     try {
-      Utils.showLoading();
+      // Utils.showLoading();
       const response = await fetch(`${API_BASE}/documents/`, {
         method: 'POST',
         body: formData,
@@ -362,7 +362,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       }));
     } finally {
       // this.setState({ uploading: false });
-      Utils.hideLoading();
+      // Utils.hideLoading();
       e.target.value = '';
     }
   }
@@ -370,7 +370,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
   async handleDocumentDelete(documentId: string, documentName: string) {
     if (!confirm(`Are you sure you want to delete "${documentName}"?`)) return;
 
-    Utils.showLoading(`Deleting "${documentName}"...`);
+    // Utils.showLoading(`Deleting "${documentName}"...`);
 
     try {
       // Stop any active polling for this document
@@ -397,7 +397,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       Utils.showToast(errorMessage, 'error');
       this.props.setError(errorMessage);
     } finally {
-      Utils.hideLoading();
+      // Utils.hideLoading();
     }
   }
 
@@ -440,7 +440,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       return;
     }
 
-    Utils.showLoading(`Deleting "${sessionName}"...`);
+    // Utils.showLoading(`Deleting "${sessionName}"...`);
 
     try {
       const response = await fetch(`${API_BASE}/chat/sessions/${sessionId}`, {
@@ -492,7 +492,7 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
       Utils.showToast(errorMessage, 'error');
       this.props.setError(errorMessage);
     } finally {
-      Utils.hideLoading();
+      // Utils.hideLoading();
     }
   }
 
