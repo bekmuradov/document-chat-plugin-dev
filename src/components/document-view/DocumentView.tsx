@@ -552,16 +552,16 @@ export class DocumentsView extends React.Component<DocumentsViewProps, Documents
 
           {/* Documents modal */}
           {showModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
-              <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 relative z-50">
+            <div className="fixed inset-0 bg-[rgba(115, 112, 112, 0.70)] dark:bg-[rgba(37, 36, 69, 0.7)] z-40 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-4xl w-full mx-4 relative z-50">
                 <div className="flex justify-between items-center border-b px-6 py-4">
-                  <h3 className="text-lg font-semibold">Project Files</h3>
-                  <button onClick={this.toggleModal} className="text-gray-500 hover:text-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Project Files</h3>
+                  <button onClick={this.toggleModal} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
 
-                <div className="p-6">
+                <div className="p-6 text-gray-600 dark:text-gray-300">
                   <div className="flex justify-between items-center mb-4">
                     <h4 className="text-md font-medium">Documents</h4>
                     <div>
