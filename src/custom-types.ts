@@ -1,5 +1,12 @@
 import { ApiService } from "./types";
 
+export interface ServiceRuntimeStatus {
+  name: string;
+  status: 'checking' | 'ready' | 'not-ready' | 'error';
+  lastChecked?: Date;
+  error?: string;
+}
+
 // Enums
 export enum ViewType {
   COLLECTIONS = 'collections',

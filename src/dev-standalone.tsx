@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import ChatCollectionsPlugin from './PluginTemplate';
+import ChatCollectionsPlugin from './ChatCollectionPlugin';
 import './PluginTemplate.css';
 import type { Services, TemplateTheme, SettingsService } from './types';
 import { fetchEventSource } from '@microsoft/fetch-event-source';

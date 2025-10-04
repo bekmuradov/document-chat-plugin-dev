@@ -16,23 +16,6 @@ import type { TemplateTheme, Services } from './types';
 // Version information
 export const version = '1.0.0';
 
-/**
- * TODO:
- * 1. List collection items - V
- * 2. make collections into scrollable list - V
- * 3. make documents into scrollable list - V
- * 4. make chat session into scrollable list - V
- * 5. implement chat session delete func
- * 6. refactor components
- * 7. add chat streaming endpoint
- * 8. implement doc search component
- * 9. add layout toggle view - V
- * 10. implement download document
- * 11. implement content preview for document
- * 12. add doc count to collection list view mode
- * 13. add markdown rendering for chat interface
- */
-
 interface ComponentServices {
   api?: {
     get: (url: string) => Promise<any>;
@@ -104,6 +87,17 @@ interface ChatCollectionsPluginState {
   currentTheme: TemplateTheme;
   isInitializing: boolean;
 }
+
+const requiredServiceRuntimes = [
+  {
+    "name": "cwyd_service",
+    "healthcheck_url": "http://localhost:8000/health",
+  },
+  {
+    "name": "document_processing_service",
+    "healthcheck_url": "http://localhost:8080/health",
+  },
+]
 
 /**
  * Chat Collections Plugin for BrainDrive
