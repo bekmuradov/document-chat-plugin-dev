@@ -132,8 +132,8 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                 "name": "cwyd_service",
                 "source_url": "https://github.com/BrainDriveAI/chat-with-your-documents",
                 "type": "docker-compose",
-                "install_command": "",
-                "start_command": "docker compose up --build -d",
+                "install_command": "docker compose build",
+                "start_command": "docker compose up -d",
                 "healthcheck_url": "http://localhost:8000/health",
                 "definition_id": self.settings_definition_id,
                 "required_env_vars": [
@@ -155,8 +155,8 @@ class ChatWithYourDocumentsLifecycleManager(BaseLifecycleManager):
                 "name": "document_processing_service",
                 "source_url": "https://github.com/BrainDriveAI/Document-Processing-Service",
                 "type": "docker-compose",
-                "install_command": "",
-                "start_command": "docker compose up --build -d",
+                "install_command": "docker compose build",
+                "start_command": "docker compose up -d",
                 "healthcheck_url": "http://localhost:8080/health",
                 "definition_id": self.settings_definition_id,
                 "required_env_vars": [
